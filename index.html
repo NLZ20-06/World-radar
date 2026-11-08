@@ -39,6 +39,8 @@ a{color:#74baff}
 .tag{display:inline-block;border:1px solid #53647a;border-radius:20px;padding:3px 8px;font-size:10px;color:#c6d5e7;margin-right:5px}
 .tag.confirm{border-color:#b58a3a;color:#ffd58b}
 .empty{color:#9aacc2;font-size:13px;padding:12px 0}
+.map-legend{display:flex;flex-wrap:wrap;gap:10px;margin:9px 0 2px;color:#b7c6d8;font-size:11px}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
 footer{text-align:center;padding:20px;color:#8295ab;font-size:11px}
 @media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.bottom,.geo-grid{grid-template-columns:1fr}#map{height:52vh}}
 </style>
@@ -65,6 +67,18 @@ footer{text-align:center;padding:20px;color:#8295ab;font-size:11px}
   </div>
   <div id="earthquakeStatus" class="status">Chargement des séismes…</div>
   <div id="map"></div>
+
+  <div class="map-legend">
+    <span><i class="legend-dot" style="background:#ff6b35"></i>Séismes</span>
+    <span><i class="legend-dot" style="background:#ef5350"></i>Conflits</span>
+    <span><i class="legend-dot" style="background:#42a5f5"></i>Diplomatie</span>
+    <span><i class="legend-dot" style="background:#ab79e8"></i>Sécurité</span>
+    <span><i class="legend-dot" style="background:#e6b84c"></i>Politique</span>
+  </div>
+
+  <div class="controls">
+    <button id="geoMapToggle" class="active">📍 Alertes géopolitiques : ON</button>
+  </div>
 
   <section class="geo-section panel">
     <div class="geo-header">
@@ -105,6 +119,7 @@ footer{text-align:center;padding:20px;color:#8295ab;font-size:11px}
       <p class="muted">Les séismes proviennent du flux USGS des dernières 24 heures.</p>
       <p class="muted">Les actualités géopolitiques sont recherchées via l’API GDELT, avec un filtre de langue française. Les articles peuvent être incomplets, dupliqués ou imprécis.</p>
       <p class="muted">Un événement « recoupé » signifie ici que plusieurs domaines publient des titres proches. Cela ne garantit ni l’exactitude de chaque détail ni une confirmation officielle.</p>
+      <p class="muted">Sur la carte, un marqueur apparaît uniquement si un lieu connu est explicitement cité dans le titre. Les marqueurs « Pays » indiquent un centre géographique approximatif, jamais le lieu exact de l’événement.</p>
       <p class="muted">Sources : <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">GDELT</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.</p>
     </div>
   </section>
@@ -119,6 +134,8 @@ const GDELT_URL="https://api.gdeltproject.org/api/v2/doc/doc";
 const map=L.map("map").setView([20,0],2);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OpenStreetMap contributors",maxZoom:18}).addTo(map);
 const earthquakeLayer=L.layerGroup().addTo(map);
+const geoMapLayer=L.layerGroup().addTo(map);
+let geoMapVisible=true;
 let earthquakes=[];
 let currentFilter="all";
 let earthquakesVisible=true;
@@ -205,8 +222,77 @@ function similarity(a,b){
   let common=0;A.forEach(w=>{if(B.has(w))common++});
   return common/Math.max(1,Math.min(A.size,B.size));
 }
+
+// Géolocalisation prudente : seuls les lieux explicitement cités dans les titres
+// et présents dans cette liste sont placés sur la carte.
+const PLACE_INDEX = [
+  {names:["kyiv","kiev"],label:"Kyiv, Ukraine",lat:50.4501,lon:30.5234,precision:"Ville"},
+  {names:["moscou","moscow"],label:"Moscou, Russie",lat:55.7558,lon:37.6173,precision:"Ville"},
+  {names:["teheran","téhéran","tehran"],label:"Téhéran, Iran",lat:35.6892,lon:51.3890,precision:"Ville"},
+  {names:["tel aviv"],label:"Tel-Aviv, Israël",lat:32.0853,lon:34.7818,precision:"Ville"},
+  {names:["jerusalem","jérusalem"],label:"Jérusalem",lat:31.7683,lon:35.2137,precision:"Ville"},
+  {names:["gaza"],label:"Gaza",lat:31.5017,lon:34.4668,precision:"Ville"},
+  {names:["beyrouth","beirut"],label:"Beyrouth, Liban",lat:33.8938,lon:35.5018,precision:"Ville"},
+  {names:["damas","damascus"],label:"Damas, Syrie",lat:33.5138,lon:36.2765,precision:"Ville"},
+  {names:["taipei"],label:"Taipei, Taïwan",lat:25.0330,lon:121.5654,precision:"Ville"},
+  {names:["islamabad"],label:"Islamabad, Pakistan",lat:33.6844,lon:73.0479,precision:"Ville"},
+  {names:["kaboul","kabul"],label:"Kaboul, Afghanistan",lat:34.5553,lon:69.2075,precision:"Ville"},
+  {names:["khartoum"],label:"Khartoum, Soudan",lat:15.5007,lon:32.5599,precision:"Ville"},
+  {names:["kinshasa"],label:"Kinshasa, RDC",lat:-4.4419,lon:15.2663,precision:"Ville"},
+  {names:["port-au-prince"],label:"Port-au-Prince, Haïti",lat:18.5944,lon:-72.3074,precision:"Ville"},
+  {names:["washington"],label:"Washington, États-Unis",lat:38.9072,lon:-77.0369,precision:"Ville"},
+  {names:["paris"],label:"Paris, France",lat:48.8566,lon:2.3522,precision:"Ville"},
+  {names:["ukraine"],label:"Ukraine",lat:48.3794,lon:31.1656,precision:"Pays"},
+  {names:["russie","russia"],label:"Russie",lat:61.5240,lon:105.3188,precision:"Pays"},
+  {names:["israel","israël"],label:"Israël",lat:31.0461,lon:34.8516,precision:"Pays"},
+  {names:["iran"],label:"Iran",lat:32.4279,lon:53.6880,precision:"Pays"},
+  {names:["liban","lebanon"],label:"Liban",lat:33.8547,lon:35.8623,precision:"Pays"},
+  {names:["syrie","syria"],label:"Syrie",lat:34.8021,lon:38.9968,precision:"Pays"},
+  {names:["soudan","sudan"],label:"Soudan",lat:12.8628,lon:30.2176,precision:"Pays"},
+  {names:["taïwan","taiwan"],label:"Taïwan",lat:23.6978,lon:120.9605,precision:"Pays"},
+  {names:["chine","china"],label:"Chine",lat:35.8617,lon:104.1954,precision:"Pays"},
+  {names:["france"],label:"France",lat:46.2276,lon:2.2137,precision:"Pays"},
+  {names:["haïti","haiti"],label:"Haïti",lat:18.9712,lon:-72.2852,precision:"Pays"}
+];
+const GEO_COLORS={conflict:"#ef5350",diplomacy:"#42a5f5",security:"#ab79e8",politics:"#e6b84c"};
+function findMentionedPlace(title){
+  const normalized=String(title||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  for(const place of PLACE_INDEX){
+    for(const name of place.names){
+      const term=name.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      const escaped=term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+      if(new RegExp("(^|[^a-z])"+escaped+"([^a-z]|$)","i").test(normalized))return place;
+    }
+  }
+  return null;
+}
+function displayGeopoliticalMarkers(){
+  geoMapLayer.clearLayers();
+  if(!geoMapVisible)return;
+  const placed=new Set();
+  geoArticles.forEach(article=>{
+    const place=findMentionedPlace(article.title);
+    if(!place)return;
+    const key=place.label+"|"+article._category;
+    if(placed.has(key))return;
+    placed.add(key);
+    const marker=L.circleMarker([place.lat,place.lon],{
+      radius:8,color:"#ffffff",weight:1.5,fillColor:GEO_COLORS[article._category]||"#e6b84c",fillOpacity:.95
+    });
+    const popup=document.createElement("div");
+    const heading=document.createElement("strong");heading.textContent=article.title;
+    const location=document.createElement("div");location.textContent="Zone mentionnée : "+place.label+" ("+place.precision+")";
+    const date=document.createElement("div");date.textContent="Date : "+(article.seendate||"non précisée");
+    const source=document.createElement("a");source.href=article.url;source.target="_blank";source.rel="noopener noreferrer";source.textContent="Lire l'article ↗";
+    popup.append(heading,location,date,source);
+    marker.bindPopup(popup);
+    geoMapLayer.addLayer(marker);
+  });
+}
+
 function renderGeopolitics(){
   const news=document.getElementById("newsList"),verified=document.getElementById("verifiedList");
+  displayGeopoliticalMarkers();
   news.replaceChildren();verified.replaceChildren();
   const filtered=geoArticles.filter(a=>geoCategory==="all"||a._category===geoCategory);
   if(!filtered.length){news.innerHTML='<div class="empty">Aucune actualité disponible pour ce filtre.</div>';verified.innerHTML='<div class="empty">Aucun regroupement disponible.</div>';return}
@@ -274,6 +360,13 @@ document.querySelectorAll(".geo-filter").forEach(button=>button.addEventListener
   renderGeopolitics();
 }));
 document.getElementById("refreshGeo").addEventListener("click",loadGeopolitics);
+document.getElementById("geoMapToggle").addEventListener("click",e=>{
+  geoMapVisible=!geoMapVisible;
+  if(geoMapVisible)map.addLayer(geoMapLayer);else map.removeLayer(geoMapLayer);
+  e.currentTarget.classList.toggle("active",geoMapVisible);
+  e.currentTarget.textContent="📍 Alertes géopolitiques : "+(geoMapVisible?"ON":"OFF");
+  displayGeopoliticalMarkers();
+});
 loadEarthquakes();
 loadGeopolitics();
 setInterval(loadEarthquakes,5*60*1000);
