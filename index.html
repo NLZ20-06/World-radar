@@ -6,589 +6,278 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WORLD RADAR</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: #08111f;
-  color: #e8eef7;
-  font-family: Arial, sans-serif;
-}
-
-header {
-  padding: 22px 18px;
-  background: #0c1828;
-  border-bottom: 1px solid #26364a;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 25px;
-  letter-spacing: 2px;
-}
-
-header p {
-  color: #9aacc2;
-  font-size: 13px;
-  margin-bottom: 0;
-}
-
-main {
-  max-width: 1500px;
-  padding: 16px;
-  margin: auto;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-
-.stat, .panel {
-  background: #111f31;
-  border: 1px solid #26364a;
-  border-radius: 10px;
-  padding: 14px;
-  min-width: 0;
-}
-
-.stat-label {
-  color: #9aacc2;
-  font-size: 11px;
-  text-transform: uppercase;
-}
-
-.stat-value {
-  font-size: 23px;
-  font-weight: bold;
-  margin-top: 8px;
-  overflow-wrap: anywhere;
-}
-
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 15px 0;
-}
-
-button {
-  background: #17283d;
-  color: #dce7f5;
-  border: 1px solid #40536b;
-  border-radius: 7px;
-  padding: 10px 13px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-button.active {
-  background: #1764a5;
-  border-color: #3999e8;
-  color: white;
-}
-
-#earthquakeStatus, #volcanoStatus {
-  color: #a8bbd0;
-  font-size: 12px;
-  margin: 8px 0;
-}
-
-#map {
-  height: 65vh;
-  min-height: 380px;
-  border-radius: 10px;
-  border: 1px solid #26364a;
-  overflow: hidden;
-}
-
-.bottom {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.panel h2 {
-  font-size: 16px;
-  margin-top: 0;
-}
-
-#eventList {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.event {
-  padding: 9px 0;
-  border-bottom: 1px solid #26364a;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.muted {
-  color: #9aacc2;
-  font-size: 12px;
-  line-height: 1.6;
-}
-
-.volcano-icon {
-  font-size: 19px;
-  line-height: 24px;
-  text-align: center;
-}
-
-footer {
-  text-align: center;
-  padding: 20px;
-  color: #8295ab;
-  font-size: 11px;
-}
-
-a { color: #74baff; }
-
-@media (max-width: 650px) {
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .bottom { grid-template-columns: 1fr; }
-  #map { height: 58vh; min-height: 340px; }
-}
+*{box-sizing:border-box}
+body{margin:0;background:#08111f;color:#e8eef7;font-family:Arial,sans-serif}
+header{padding:22px 18px;background:#0c1828;border-bottom:1px solid #26364a}
+header h1{margin:0;font-size:25px;letter-spacing:2px}
+header p{color:#9aacc2;font-size:13px;margin-bottom:0}
+main{max-width:1500px;padding:16px;margin:auto}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat,.panel{background:#111f31;border:1px solid #26364a;border-radius:10px;padding:14px;min-width:0}
+.stat-label{color:#9aacc2;font-size:11px;text-transform:uppercase}
+.stat-value{font-size:23px;font-weight:bold;margin-top:8px;overflow-wrap:anywhere}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}
+button,.tab{background:#17283d;color:#dce7f5;border:1px solid #40536b;border-radius:7px;padding:10px 13px;cursor:pointer;font-size:13px}
+button.active,.tab.active{background:#1764a5;border-color:#3999e8;color:white}
+.status{color:#a8bbd0;font-size:12px;margin:8px 0;line-height:1.5}
+#map{height:58vh;min-height:340px;border-radius:10px;border:1px solid #26364a;overflow:hidden}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.panel h2{font-size:16px;margin-top:0}
+#eventList{max-height:330px;overflow-y:auto}
+.event{padding:9px 0;border-bottom:1px solid #26364a;font-size:13px;line-height:1.5}
+.muted{color:#9aacc2;font-size:12px;line-height:1.6}
+a{color:#74baff}
+.geo-section{margin-top:18px}
+.geo-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.geo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.news-list{display:flex;flex-direction:column;gap:10px}
+.news-card{background:#0d1a2a;border:1px solid #2b3c52;border-radius:9px;padding:12px}
+.news-card h3{font-size:14px;line-height:1.45;margin:0 0 8px}
+.news-meta{font-size:11px;color:#9aacc2;line-height:1.5;margin-bottom:8px}
+.news-card p{font-size:12px;color:#c4d0df;line-height:1.5;margin:0 0 8px}
+.tag{display:inline-block;border:1px solid #53647a;border-radius:20px;padding:3px 8px;font-size:10px;color:#c6d5e7;margin-right:5px}
+.tag.confirm{border-color:#b58a3a;color:#ffd58b}
+.empty{color:#9aacc2;font-size:13px;padding:12px 0}
+footer{text-align:center;padding:20px;color:#8295ab;font-size:11px}
+@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.bottom,.geo-grid{grid-template-columns:1fr}#map{height:52vh}}
 </style>
 </head>
-
 <body>
-
 <header>
   <h1>WORLD RADAR</h1>
   <p>GLOBAL CRISIS INTELLIGENCE PLATFORM</p>
 </header>
-
 <main>
+  <section class="stats">
+    <div class="stat"><div class="stat-label">Séismes détectés (24 h)</div><div class="stat-value" id="earthquakeTotal">—</div></div>
+    <div class="stat"><div class="stat-label">Magnitude maximale</div><div class="stat-value" id="maxMagnitude">—</div></div>
+    <div class="stat"><div class="stat-label">Dernière actualisation</div><div class="stat-value" id="lastUpdate">—</div></div>
+  </section>
 
-<section class="stats">
-  <div class="stat">
-    <div class="stat-label">Séismes détectés</div>
-    <div class="stat-value" id="earthquakeTotal">—</div>
+  <div class="controls">
+    <button id="earthquakeToggle" class="active">🌍 Séismes : ON</button>
   </div>
-
-  <div class="stat">
-    <div class="stat-label">Magnitude maximale</div>
-    <div class="stat-value" id="maxMagnitude">—</div>
+  <div class="controls">
+    <button class="filter active" data-filter="all">Toutes magnitudes</button>
+    <button class="filter" data-filter="4">Magnitude 4+</button>
+    <button class="filter" data-filter="5">Magnitude 5+</button>
   </div>
+  <div id="earthquakeStatus" class="status">Chargement des séismes…</div>
+  <div id="map"></div>
 
-  <div class="stat">
-    <div class="stat-label">Volcans répertoriés</div>
-    <div class="stat-value" id="volcanoTotal">—</div>
-  </div>
+  <section class="geo-section panel">
+    <div class="geo-header">
+      <div>
+        <h2 style="margin-bottom:4px">🌐 Radar géopolitique</h2>
+        <div class="muted">Actualités internationales en français et événements recoupés.</div>
+      </div>
+      <button id="refreshGeo">↻ Actualiser</button>
+    </div>
+    <div class="controls">
+      <button class="geo-filter active" data-category="all">Toutes les actualités</button>
+      <button class="geo-filter" data-category="conflict">Conflits</button>
+      <button class="geo-filter" data-category="diplomacy">Diplomatie</button>
+      <button class="geo-filter" data-category="security">Sécurité</button>
+      <button class="geo-filter" data-category="politics">Politique</button>
+    </div>
+    <div id="geoStatus" class="status">Chargement des actualités géopolitiques…</div>
+    <div class="geo-grid">
+      <div>
+        <h2>Actualités récentes</h2>
+        <div id="newsList" class="news-list"><div class="empty">Chargement…</div></div>
+      </div>
+      <div>
+        <h2>Événements recoupés</h2>
+        <div class="muted" style="margin-bottom:10px">Regroupements indicatifs d’articles similaires provenant de médias distincts. Ils ne constituent pas une confirmation officielle.</div>
+        <div id="verifiedList" class="news-list"><div class="empty">En attente des articles…</div></div>
+      </div>
+    </div>
+  </section>
 
-  <div class="stat">
-    <div class="stat-label">Dernière actualisation</div>
-    <div class="stat-value" id="lastUpdate">—</div>
-  </div>
-</section>
-
-<div class="controls">
-  <button id="earthquakeToggle" class="active">
-    🌍 Séismes : ON
-  </button>
-
-  <button id="volcanoToggle" class="active">
-    🌋 Volcans : ON
-  </button>
-</div>
-
-<div class="controls">
-  <button class="filter active" data-filter="all">
-    Toutes magnitudes
-  </button>
-
-  <button class="filter" data-filter="4">
-    Magnitude 4+
-  </button>
-
-  <button class="filter" data-filter="5">
-    Magnitude 5+
-  </button>
-</div>
-
-<div id="earthquakeStatus">Chargement des séismes…</div>
-<div id="volcanoStatus">Chargement des volcans…</div>
-
-<div id="map"></div>
-
-<section class="bottom">
-
-  <div class="panel">
-    <h2>Derniers séismes</h2>
-    <div id="eventList">Chargement…</div>
-  </div>
-
-  <div class="panel">
-    <h2>Sources et informations</h2>
-
-    <p class="muted">
-      Les séismes proviennent du flux USGS des dernières 24 heures.
-    </p>
-
-    <p class="muted">
-      Les volcans proviennent d'un inventaire mondial issu du
-      Smithsonian Global Volcanism Program et de NOAA.
-      Leur présence sur la carte ne signifie pas qu'ils sont
-      actuellement en éruption.
-    </p>
-
-    <p class="muted">
-      Sources :
-      <a href="https://earthquake.usgs.gov/" target="_blank">USGS</a> ·
-      <a href="https://volcano.si.edu/" target="_blank">Smithsonian GVP</a> ·
-      <a href="https://www.ncei.noaa.gov/" target="_blank">NOAA</a> ·
-      <a href="https://www.esri.com/" target="_blank">Esri / ArcGIS</a> ·
-      <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
-    </p>
-  </div>
-
-</section>
+  <section class="bottom">
+    <div class="panel">
+      <h2>Derniers séismes</h2>
+      <div id="eventList">Chargement…</div>
+    </div>
+    <div class="panel">
+      <h2>Sources et méthode</h2>
+      <p class="muted">Les séismes proviennent du flux USGS des dernières 24 heures.</p>
+      <p class="muted">Les actualités géopolitiques sont recherchées via l’API GDELT, avec un filtre de langue française. Les articles peuvent être incomplets, dupliqués ou imprécis.</p>
+      <p class="muted">Un événement « recoupé » signifie ici que plusieurs domaines publient des titres proches. Cela ne garantit ni l’exactitude de chaque détail ni une confirmation officielle.</p>
+      <p class="muted">Sources : <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">GDELT</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.</p>
+    </div>
+  </section>
 </main>
-
-<footer>
-WORLD RADAR — Global Crisis Intelligence Platform
-</footer>
+<footer>WORLD RADAR — Global Crisis Intelligence Platform</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-const USGS_URL =
-"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+"use strict";
+const USGS_URL="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+const GDELT_URL="https://api.gdeltproject.org/api/v2/doc/doc";
+const map=L.map("map").setView([20,0],2);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"&copy; OpenStreetMap contributors",maxZoom:18}).addTo(map);
+const earthquakeLayer=L.layerGroup().addTo(map);
+let earthquakes=[];
+let currentFilter="all";
+let earthquakesVisible=true;
+let geoArticles=[];
+let geoCategory="all";
 
-const ARCGIS_LAYER =
-"https://services.arcgis.com/BG6nSlhZSAWtExvp/ArcGIS/rest/services/World_Volcanoes/FeatureServer/0";
-
-const map = L.map("map").setView([20, 0], 2);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; OpenStreetMap contributors",
-  maxZoom: 18
-}).addTo(map);
-
-const earthquakeLayer = L.layerGroup().addTo(map);
-const volcanoLayer = L.layerGroup().addTo(map);
-
-let earthquakes = [];
-let currentFilter = "all";
-let earthquakesVisible = true;
-let volcanoesVisible = true;
-
-const earthquakeButton = document.getElementById("earthquakeToggle");
-const volcanoButton = document.getElementById("volcanoToggle");
-
-function setText(id, value) {
-  document.getElementById(id).textContent = value;
-}
-
-function safeValue(value) {
-  return value === null || value === undefined || value === ""
-    ? "Non renseigné"
-    : String(value);
-}
-
-function makePopup(lines) {
-  const box = document.createElement("div");
-
-  lines.forEach((line, index) => {
-    const element = document.createElement(index === 0 ? "strong" : "div");
-    element.textContent = line;
-    box.appendChild(element);
-  });
-
+function setText(id,value){document.getElementById(id).textContent=value}
+function safeValue(value){return value===null||value===undefined||value===""?"Non renseigné":String(value)}
+function makePopup(lines){
+  const box=document.createElement("div");
+  lines.forEach((line,index)=>{const el=document.createElement(index===0?"strong":"div");el.textContent=line;box.appendChild(el)});
   return box;
 }
-
-function updateButton(button, visible, label) {
-  button.classList.toggle("active", visible);
-  button.textContent = label + (visible ? " : ON" : " : OFF");
-}
-
-function displayEarthquakes() {
+function displayEarthquakes(){
   earthquakeLayer.clearLayers();
-
-  if (!earthquakesVisible) return;
-
-  const visibleEvents = earthquakes.filter(event => {
-    const mag = Number(event.properties.mag) || 0;
-
-    if (currentFilter === "4") return mag >= 4;
-    if (currentFilter === "5") return mag >= 5;
-
+  if(!earthquakesVisible)return;
+  const visible=earthquakes.filter(e=>{
+    const mag=Number(e.properties.mag)||0;
+    if(currentFilter==="4")return mag>=4;
+    if(currentFilter==="5")return mag>=5;
     return true;
   });
-
-  visibleEvents.forEach(event => {
-    const coordinates = event.geometry?.coordinates;
-
-    if (!coordinates || coordinates.length < 2) return;
-
-    const longitude = Number(coordinates[0]);
-    const latitude = Number(coordinates[1]);
-    const depth = Number(coordinates[2]) || 0;
-    const magnitude = Number(event.properties.mag) || 0;
-
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
-
-    const marker = L.circleMarker([latitude, longitude], {
-      radius: Math.max(4, Math.min(12, magnitude * 2)),
-      color: "#ff9b42",
-      fillColor: "#ff6b35",
-      fillOpacity: 0.8,
-      weight: 1
-    });
-
-    marker.bindPopup(makePopup([
-      safeValue(event.properties.title),
-      "Lieu : " + safeValue(event.properties.place),
-      "Magnitude : " + magnitude.toFixed(1),
-      "Profondeur : " + depth + " km",
-      "Date : " + new Date(event.properties.time).toLocaleString("fr-FR")
-    ]));
-
+  visible.forEach(event=>{
+    const c=event.geometry&&event.geometry.coordinates;
+    if(!c||c.length<2)return;
+    const lon=Number(c[0]),lat=Number(c[1]),depth=Number(c[2])||0,mag=Number(event.properties.mag)||0;
+    if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
+    const marker=L.circleMarker([lat,lon],{radius:Math.max(4,Math.min(12,mag*2)),color:"#ff9b42",fillColor:"#ff6b35",fillOpacity:.8,weight:1});
+    marker.bindPopup(makePopup([safeValue(event.properties.title),"Lieu : "+safeValue(event.properties.place),"Magnitude : "+mag.toFixed(1),"Profondeur : "+depth+" km","Date : "+new Date(event.properties.time).toLocaleString("fr-FR")]));
     earthquakeLayer.addLayer(marker);
   });
 }
-
-async function loadEarthquakes() {
-  try {
-    const response = await fetch(USGS_URL);
-
-    if (!response.ok) {
-      throw new Error("USGS HTTP " + response.status);
-    }
-
-    const data = await response.json();
-
-    if (!Array.isArray(data.features)) {
-      throw new Error("Format USGS incorrect");
-    }
-
-    earthquakes = data.features;
-
-    setText("earthquakeTotal", earthquakes.length);
-
-    const magnitudes = earthquakes
-      .map(item => Number(item.properties.mag))
-      .filter(value => Number.isFinite(value));
-
-    setText(
-      "maxMagnitude",
-      magnitudes.length ? Math.max(...magnitudes).toFixed(1) : "—"
-    );
-
+async function loadEarthquakes(){
+  try{
+    const response=await fetch(USGS_URL);
+    if(!response.ok)throw new Error("USGS HTTP "+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data.features))throw new Error("Format USGS incorrect");
+    earthquakes=data.features;
+    setText("earthquakeTotal",earthquakes.length);
+    const mags=earthquakes.map(x=>Number(x.properties.mag)).filter(Number.isFinite);
+    setText("maxMagnitude",mags.length?Math.max(...mags).toFixed(1):"—");
     displayEarthquakes();
-
-    setText("lastUpdate", new Date().toLocaleTimeString("fr-FR"));
-
-    const list = document.getElementById("eventList");
-    list.replaceChildren();
-
-    [...earthquakes]
-      .sort((a, b) => b.properties.time - a.properties.time)
-      .slice(0, 15)
-      .forEach(event => {
-        const item = document.createElement("div");
-        item.className = "event";
-
-        const magnitude = Number(event.properties.mag);
-        item.textContent =
-          "M" + (Number.isFinite(magnitude) ? magnitude.toFixed(1) : "?") +
-          " — " + safeValue(event.properties.place) +
-          " — " + new Date(event.properties.time).toLocaleString("fr-FR");
-
-        list.appendChild(item);
-      });
-
-    setText(
-      "earthquakeStatus",
-      "USGS : " + earthquakes.length + " séismes chargés."
-    );
-
-  } catch (error) {
-    console.error("Erreur USGS :", error);
-    setText("earthquakeStatus", "Erreur séismes : " + error.message);
+    setText("lastUpdate",new Date().toLocaleTimeString("fr-FR"));
+    const list=document.getElementById("eventList");list.replaceChildren();
+    [...earthquakes].sort((a,b)=>b.properties.time-a.properties.time).slice(0,15).forEach(e=>{
+      const item=document.createElement("div");item.className="event";
+      const m=Number(e.properties.mag);
+      item.textContent="M"+(Number.isFinite(m)?m.toFixed(1):"?")+" — "+safeValue(e.properties.place)+" — "+new Date(e.properties.time).toLocaleString("fr-FR");
+      list.appendChild(item);
+    });
+    setText("earthquakeStatus","USGS : "+earthquakes.length+" séismes reçus. Actualisation automatique toutes les 5 minutes.");
+  }catch(error){console.error(error);setText("earthquakeStatus","Impossible de charger les séismes : "+error.message)}
+}
+const GEO_QUERIES={
+  all:'(guerre OR conflit OR attaque OR frappe OR crise diplomatique OR tensions OR attentat OR coup d état OR sanctions)',
+  conflict:'(guerre OR conflit armé OR affrontements OR offensive OR frappe militaire)',
+  diplomacy:'(diplomatie OR négociations OR sanctions OR ambassade OR tensions diplomatiques)',
+  security:'(attentat OR attaque OR terrorisme OR sécurité OR explosion)',
+  politics:'(coup d état OR crise politique OR élections OR gouvernement OR manifestation)'
+};
+function cleanText(value){return String(value||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()}
+function articleDomain(url){
+  try{return new URL(url).hostname.replace(/^www\./,"").toLowerCase()}catch{return ""}
+}
+function renderArticle(article){
+  const card=document.createElement("article");card.className="news-card";
+  const title=document.createElement("h3");title.textContent=cleanText(article.title)||"Article sans titre";
+  const meta=document.createElement("div");meta.className="news-meta";
+  const date=article.seendate?String(article.seendate):"Date non précisée";
+  const domain=article.domain||articleDomain(article.url);
+  meta.textContent=(domain||"Source inconnue")+" · "+date;
+  const tag=document.createElement("span");tag.className="tag";tag.textContent="Actualité détectée";
+  const link=document.createElement("a");link.href=article.url||"#";link.target="_blank";link.rel="noopener noreferrer";link.textContent="Lire la source ↗";link.style.fontSize="12px";
+  card.append(title,meta,tag,document.createElement("br"),link);
+  return card;
+}
+function normalizeTitle(title){
+  return cleanText(title).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/https?:\/\/\S+/g,"").replace(/[^\p{L}\p{N}\s]/gu," ").split(/\s+/).filter(w=>w.length>3&&!["dans","avec","pour","apres","avant","selon","plus","contre","entre","cette","cette","leur","leurs","dans","sur","une","des","les","the","and"].includes(w));
+}
+function similarity(a,b){
+  const A=new Set(normalizeTitle(a)),B=new Set(normalizeTitle(b));
+  if(!A.size||!B.size)return 0;
+  let common=0;A.forEach(w=>{if(B.has(w))common++});
+  return common/Math.max(1,Math.min(A.size,B.size));
+}
+function renderGeopolitics(){
+  const news=document.getElementById("newsList"),verified=document.getElementById("verifiedList");
+  news.replaceChildren();verified.replaceChildren();
+  const filtered=geoArticles.filter(a=>geoCategory==="all"||a._category===geoCategory);
+  if(!filtered.length){news.innerHTML='<div class="empty">Aucune actualité disponible pour ce filtre.</div>';verified.innerHTML='<div class="empty">Aucun regroupement disponible.</div>';return}
+  filtered.slice(0,35).forEach(a=>news.appendChild(renderArticle(a)));
+  const groups=[];
+  filtered.forEach(article=>{
+    let group=groups.find(g=>similarity(g.items[0].title,article.title)>=0.55);
+    if(!group){groups.push({items:[article]})}else if(!group.items.some(x=>articleDomain(x.url)===articleDomain(article.url))){group.items.push(article)}
+  });
+  const multi=groups.filter(g=>new Set(g.items.map(x=>articleDomain(x.url)).filter(Boolean)).size>=2).sort((a,b)=>b.items.length-a.items.length);
+  if(!multi.length){verified.innerHTML='<div class="empty">Pas encore de sujets repérés dans plusieurs médias distincts. Cela ne signifie pas qu’aucun événement n’est confirmé.</div>'}
+  multi.slice(0,15).forEach(g=>{
+    const card=document.createElement("article");card.className="news-card";
+    const h=document.createElement("h3");h.textContent=g.items[0].title;
+    const tag=document.createElement("span");tag.className="tag confirm";tag.textContent="Plusieurs médias";
+    const desc=document.createElement("p");desc.textContent=g.items.length+" articles proches provenant de "+new Set(g.items.map(x=>articleDomain(x.url))).size+" domaines distincts.";
+    card.append(h,tag,desc);
+    g.items.slice(0,4).forEach(a=>{
+      const link=document.createElement("a");link.href=a.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent=(a.domain||articleDomain(a.url)||"Source")+" ↗";link.style.display="inline-block";link.style.fontSize="12px";link.style.marginRight="10px";card.appendChild(link);
+    });
+    verified.appendChild(card);
+  });
+}
+function classifyArticle(a){
+  const text=(a.title+" "+(a.seendate||"")).toLowerCase();
+  if(/guerre|conflit|armée|militaire|frappe|offensive|front|combats|affrontements/.test(text))return "conflict";
+  if(/diplomat|négociation|sanction|ambassade|sommet|traité/.test(text))return "diplomacy";
+  if(/attentat|terror|attaque|explosion|sécurité/.test(text))return "security";
+  return "politics";
+}
+async function loadGeopolitics(){
+  const status=document.getElementById("geoStatus");
+  status.textContent="Recherche des actualités géopolitiques en français…";
+  try{
+    const params=new URLSearchParams({query:GEO_QUERIES.all,mode:"ArtList",format:"json",maxrecords:"50",timespan:"24h",sort:"DateDesc",sourcelang:"french"});
+    const response=await fetch(GDELT_URL+"?"+params.toString(),{headers:{Accept:"application/json"}});
+    if(!response.ok)throw new Error("GDELT HTTP "+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data.articles))throw new Error("Réponse GDELT inattendue");
+    geoArticles=data.articles.filter(a=>a.url&&a.title).map(a=>({...a,_category:classifyArticle(a)}));
+    renderGeopolitics();
+    status.textContent=geoArticles.length+" actualités en français trouvées sur les dernières 24 heures. Actualisation automatique toutes les 15 minutes.";
+  }catch(error){
+    console.error("GDELT :",error);
+    status.textContent="Flux géopolitique indisponible pour le moment ("+error.message+"). Réessaie plus tard.";
+    document.getElementById("newsList").innerHTML='<div class="empty">Impossible de récupérer les actualités. Le service GDELT peut être temporairement indisponible ou limiter les requêtes.</div>';
+    document.getElementById("verifiedList").innerHTML='<div class="empty">Les recoupements seront affichés lorsque le flux sera disponible.</div>';
   }
 }
-
-function getAttribute(attributes, pattern) {
-  const key = Object.keys(attributes).find(name => pattern.test(name));
-  return key ? attributes[key] : null;
-}
-
-async function loadVolcanoes() {
-  try {
-    setText("volcanoStatus", "Récupération de l'inventaire volcanique…");
-
-    const idsURL = new URL(ARCGIS_LAYER + "/query");
-
-    idsURL.search = new URLSearchParams({
-      where: "1=1",
-      returnIdsOnly: "true",
-      f: "json"
-    }).toString();
-
-    const idsResponse = await fetch(idsURL);
-    if (!idsResponse.ok) {
-      throw new Error("ArcGIS IDs HTTP " + idsResponse.status);
-    }
-
-    const idsData = await idsResponse.json();
-
-    if (!Array.isArray(idsData.objectIds)) {
-      throw new Error(idsData.error?.message || "Liste des identifiants absente");
-    }
-
-    const ids = idsData.objectIds;
-    const batchSize = 400;
-
-    volcanoLayer.clearLayers();
-
-    let count = 0;
-
-    for (let start = 0; start < ids.length; start += batchSize) {
-      const batch = ids.slice(start, start + batchSize);
-
-      const queryURL = new URL(ARCGIS_LAYER + "/query");
-
-      queryURL.search = new URLSearchParams({
-        objectIds: batch.join(","),
-        outFields: "*",
-        returnGeometry: "true",
-        outSR: "4326",
-        f: "json"
-      }).toString();
-
-      const response = await fetch(queryURL);
-
-      if (!response.ok) {
-        throw new Error("ArcGIS données HTTP " + response.status);
-      }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error.message || "Erreur ArcGIS");
-      }
-
-      if (!Array.isArray(data.features)) {
-        throw new Error("Format des volcans inattendu");
-      }
-
-      data.features.forEach(feature => {
-        const attributes = feature.attributes || {};
-        const geometry = feature.geometry;
-
-        if (!geometry) return;
-
-        const longitude = Number(geometry.x);
-        const latitude = Number(geometry.y);
-
-        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
-
-        const name = getAttribute(
-          attributes,
-          /volcano.*name|^name$/i
-        );
-
-        const country = getAttribute(
-          attributes,
-          /country|nation/i
-        );
-
-        const eruption = getAttribute(
-          attributes,
-          /last.*eruption|eruption.*year/i
-        );
-
-        const icon = L.divIcon({
-          className: "",
-          html: '<div class="volcano-icon">🌋</div>',
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
-
-        const marker = L.marker([latitude, longitude], { icon });
-
-        marker.bindPopup(makePopup([
-          safeValue(name || "Volcan"),
-          "Pays : " + safeValue(country),
-          "Dernière éruption répertoriée : " + safeValue(eruption),
-          "Inventaire : Smithsonian GVP / NOAA via ArcGIS"
-        ]));
-
-        volcanoLayer.addLayer(marker);
-        count++;
-      });
-
-      setText(
-        "volcanoStatus",
-        "Chargement des volcans : " + count + " / " + ids.length
-      );
-    }
-
-    if (count === 0) {
-      throw new Error("Aucun volcan avec coordonnées valides");
-    }
-
-    setText("volcanoTotal", count);
-    setText("volcanoStatus", "Inventaire volcanique chargé : " + count + " volcans.");
-
-  } catch (error) {
-    console.error("Erreur volcans :", error);
-    setText("volcanoTotal", "Erreur");
-    setText("volcanoStatus", "Erreur de chargement des volcans : " + error.message);
-  }
-}
-
-earthquakeButton.addEventListener("click", () => {
-  earthquakesVisible = !earthquakesVisible;
-
-  if (earthquakesVisible) {
-    map.addLayer(earthquakeLayer);
-  } else {
-    map.removeLayer(earthquakeLayer);
-  }
-
-  updateButton(earthquakeButton, earthquakesVisible, "🌍 Séismes");
+document.getElementById("earthquakeToggle").addEventListener("click",e=>{
+  earthquakesVisible=!earthquakesVisible;
+  if(earthquakesVisible)map.addLayer(earthquakeLayer);else map.removeLayer(earthquakeLayer);
+  e.currentTarget.classList.toggle("active",earthquakesVisible);
+  e.currentTarget.textContent="🌍 Séismes : "+(earthquakesVisible?"ON":"OFF");
   displayEarthquakes();
 });
-
-volcanoButton.addEventListener("click", () => {
-  volcanoesVisible = !volcanoesVisible;
-
-  if (volcanoesVisible) {
-    map.addLayer(volcanoLayer);
-  } else {
-    map.removeLayer(volcanoLayer);
-  }
-
-  updateButton(volcanoButton, volcanoesVisible, "🌋 Volcans");
-});
-
-document.querySelectorAll(".filter").forEach(button => {
-  button.addEventListener("click", () => {
-    currentFilter = button.dataset.filter;
-
-    document.querySelectorAll(".filter").forEach(item => {
-      item.classList.remove("active");
-    });
-
-    button.classList.add("active");
-    displayEarthquakes();
-  });
-});
-
+document.querySelectorAll(".filter").forEach(button=>button.addEventListener("click",()=>{
+  currentFilter=button.dataset.filter;
+  document.querySelectorAll(".filter").forEach(b=>b.classList.toggle("active",b===button));
+  displayEarthquakes();
+}));
+document.querySelectorAll(".geo-filter").forEach(button=>button.addEventListener("click",()=>{
+  geoCategory=button.dataset.category;
+  document.querySelectorAll(".geo-filter").forEach(b=>b.classList.toggle("active",b===button));
+  renderGeopolitics();
+}));
+document.getElementById("refreshGeo").addEventListener("click",loadGeopolitics);
 loadEarthquakes();
-loadVolcanoes();
-
-setInterval(loadEarthquakes, 5 * 60 * 1000);
+loadGeopolitics();
+setInterval(loadEarthquakes,5*60*1000);
+setInterval(loadGeopolitics,15*60*1000);
 </script>
 </body>
 </html>
