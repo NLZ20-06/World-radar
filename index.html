@@ -182,7 +182,8 @@
       <button class="active" data-filter="all">Tous</button>
       <button data-filter="4">Magnitude 4+</button>
       <button data-filter="5">Magnitude 5+</button>
-    </div>
+      <button id="volcanoToggle" class="active">🌋 Volcans</button>
+      </div>
 
     <div id="map"></div>
   </section>
@@ -218,7 +219,10 @@
   let earthquakes = [];
   let markers = [];
   let currentFilter = "all";
-
+  let volcanoLayer = L.layerGroup().addTo(map);
+  let volcanoesVisible = true;
+  let volcanoesLoaded = false;
+  
   function colorForMagnitude(mag) {
     if (mag >= 6) return "#ff3b3b";
     if (mag >= 5) return "#ff8c42";
@@ -319,6 +323,83 @@
       events.textContent = "Aucun événement pour ce filtre.";
     }
   }
+  
+async function loadVolcanoes() {
+  const url =
+    "https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GVP-VOTW%3ASmithsonian_VOTW_Holocene_Volcanoes&maxFeatures=5000&outputFormat=application%2Fjson";
+
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("Erreur Smithsonian : " + response.status);
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data.features)) {
+      throw new Error("Format de données inattendu");
+    }
+
+    volcanoLayer.clearLayers();
+
+    data.features.forEach(feature => {
+      if (!feature.geometry ||
+          !feature.geometry.coordinates) return;
+
+      const coords = feature.geometry.coordinates;
+      const longitude = coords[0];
+      const latitude = coords[1];
+
+      if (!Number.isFinite(latitude) ||
+          !Number.isFinite(longitude)) return;
+
+      const properties = feature.properties || {};
+
+      const name =
+        properties.Volcano_Name ||
+        properties.volcano_name ||
+        properties.Name ||
+        "Volcan sans nom";
+
+      const country =
+        properties.Country ||
+        properties.country ||
+        "Pays non renseigné";
+
+      const marker = L.marker(
+        [latitude, longitude],
+        {
+          icon: L.divIcon({
+            className: "",
+            html: "🌋",
+            iconSize: [25, 25],
+            iconAnchor: [12, 12]
+          })
+        }
+      );
+
+      const popup = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = name;
+
+      const location = document.createElement("p");
+      location.textContent = country;
+
+      popup.append(title, location);
+      marker.bindPopup(popup);
+
+      volcanoLayer.addLayer(marker);
+    });
+
+    volcanoesLoaded = true;
+
+    console.log("Volcans chargés :", data.features.length);
+
+  } catch (error) {
+    console.error("Erreur de chargement des volcans :", error);
+  }
+}
 
   async function loadEarthquakes() {
     const status = document.getElementById("status");
@@ -379,8 +460,25 @@
     });
   });
 
-  loadEarthquakes();
-  setInterval(loadEarthquakes, 5 * 60 * 1000);
+  
+document.getElementById("volcanoToggle")
+  .addEventListener("click", function() {
+    volcanoesVisible = !volcanoesVisible;
+
+    if (volcanoesVisible) {
+      map.addLayer(volcanoLayer);
+      this.classList.add("active");
+    } else {
+      map.removeLayer(volcanoLayer);
+      this.classList.remove("active");
+    }
+  });
+
+loadEarthquakes();
+loadVolcanoes();
+
+setInterval(loadEarthquakes, 5 * 60 * 1000);
+
 </script>
 
 </body>
