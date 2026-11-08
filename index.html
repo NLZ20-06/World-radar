@@ -9,6 +9,125 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
+/* IDENTITE VISUELLE WORLD RADAR */
+
+:root {
+ --bg:#0b1119;
+ --panel:#141d28;
+ --panel2:#101923;
+ --border:#303b48;
+ --text:#e1e6ec;
+ --muted:#9ba8b6;
+ --blue:#8aaac8;
+ --green:#7fa995;
+ --red:#d47d79;
+ --orange:#d5a16e;
+ --yellow:#cbb77c;
+}
+
+body {
+ font-family:Arial, Helvetica, sans-serif;
+ letter-spacing:.1px;
+}
+
+header {
+ background:#101923;
+ border-bottom:2px solid #647d91;
+ padding:23px;
+}
+
+header h1 {
+ font-family:Georgia,serif;
+ font-size:29px;
+ letter-spacing:4px;
+ font-weight:normal;
+}
+
+header p {
+ letter-spacing:1.5px;
+}
+
+.live {
+ color:#91b49e;
+ letter-spacing:1px;
+}
+
+.panel,.stat {
+ border-radius:4px;
+ box-shadow:none;
+}
+
+.panel {
+ padding:19px;
+}
+
+.stat {
+ border-top:2px solid #60788c;
+}
+
+.stat-value {
+ font-family:Georgia,serif;
+ font-weight:normal;
+}
+
+h2 {
+ font-family:Georgia,serif;
+ font-weight:normal;
+ font-size:19px;
+ letter-spacing:.3px;
+ border-bottom:1px solid var(--border);
+ padding-bottom:10px;
+}
+
+.news {
+ border-radius:3px;
+ border-left:2px solid #61798c;
+ padding:15px;
+}
+
+.news h3 {
+ font-family:Georgia,serif;
+ font-weight:normal;
+ font-size:16px;
+ line-height:1.5;
+}
+
+.tag {
+ border-radius:2px;
+ text-transform:uppercase;
+ letter-spacing:.5px;
+}
+
+button,select {
+ border-radius:3px;
+}
+
+button.active {
+ background:#344c61;
+ border-color:#829bb0;
+}
+
+#map {
+ border-radius:3px;
+}
+
+.alert-count {
+ border-radius:3px;
+}
+
+.currency {
+ border-radius:3px;
+}
+
+.notice {
+ border-radius:3px;
+}
+
+footer {
+ border-top:1px solid var(--border);
+ letter-spacing:.5px;
+}
+
 <style>
 :root {
  --bg:#08111f;
