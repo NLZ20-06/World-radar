@@ -2,463 +2,593 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WORLD RADAR — Global Crisis Intelligence</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WORLD RADAR</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: #08111f;
-      color: #e8eef7;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      padding: 22px 18px 14px;
-      border-bottom: 1px solid #26364a;
-      background: #0c1828;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 25px;
-      letter-spacing: 2px;
-    }
-    header p {
-      margin: 7px 0 0;
-      color: #9aacc2;
-      font-size: 13px;
-    }
-    main { padding: 16px; max-width: 1500px; margin: auto; }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    .stat {
-      background: #111f31;
-      border: 1px solid #26364a;
-      border-radius: 10px;
-      padding: 13px;
-      min-width: 0;
-    }
-    .stat-label {
-      color: #9aacc2;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-    .stat-value {
-      font-size: 23px;
-      font-weight: bold;
-      margin-top: 7px;
-      overflow-wrap: anywhere;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 14px 0;
-    }
-    button {
-      border: 1px solid #40536b;
-      border-radius: 7px;
-      background: #17283d;
-      color: #dce7f5;
-      padding: 10px 13px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    button.active {
-      background: #1764a5;
-      border-color: #3999e8;
-      color: white;
-    }
-    button:disabled { opacity: .5; cursor: not-allowed; }
-    #status {
-      color: #a8bbd0;
-      font-size: 12px;
-      margin: 8px 0 12px;
-    }
-    #map {
-      width: 100%;
-      height: 65vh;
-      min-height: 380px;
-      border: 1px solid #26364a;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .bottom {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    .panel {
-      background: #111f31;
-      border: 1px solid #26364a;
-      border-radius: 10px;
-      padding: 15px;
-      min-width: 0;
-    }
-    .panel h2 { font-size: 16px; margin: 0 0 12px; }
-    #eventList {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .event {
-      padding: 9px 0;
-      border-bottom: 1px solid #26364a;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .event:last-child { border-bottom: 0; }
-    .muted { color: #9aacc2; font-size: 12px; }
-    .volcano-icon {
-      font-size: 19px;
-      text-align: center;
-      line-height: 24px;
-    }
-    footer {
-      padding: 18px;
-      text-align: center;
-      color: #8295ab;
-      font-size: 11px;
-    }
-    a { color: #74baff; }
-    @media (max-width: 650px) {
-      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .bottom { grid-template-columns: 1fr; }
-      #map { height: 58vh; min-height: 340px; }
-    }
-  </style>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #08111f;
+  color: #e8eef7;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 22px 18px;
+  background: #0c1828;
+  border-bottom: 1px solid #26364a;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 25px;
+  letter-spacing: 2px;
+}
+
+header p {
+  color: #9aacc2;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+main {
+  max-width: 1500px;
+  padding: 16px;
+  margin: auto;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.stat, .panel {
+  background: #111f31;
+  border: 1px solid #26364a;
+  border-radius: 10px;
+  padding: 14px;
+  min-width: 0;
+}
+
+.stat-label {
+  color: #9aacc2;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 23px;
+  font-weight: bold;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+button {
+  background: #17283d;
+  color: #dce7f5;
+  border: 1px solid #40536b;
+  border-radius: 7px;
+  padding: 10px 13px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button.active {
+  background: #1764a5;
+  border-color: #3999e8;
+  color: white;
+}
+
+#earthquakeStatus, #volcanoStatus {
+  color: #a8bbd0;
+  font-size: 12px;
+  margin: 8px 0;
+}
+
+#map {
+  height: 65vh;
+  min-height: 380px;
+  border-radius: 10px;
+  border: 1px solid #26364a;
+  overflow: hidden;
+}
+
+.bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.panel h2 {
+  font-size: 16px;
+  margin-top: 0;
+}
+
+#eventList {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.event {
+  padding: 9px 0;
+  border-bottom: 1px solid #26364a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.muted {
+  color: #9aacc2;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.volcano-icon {
+  font-size: 19px;
+  line-height: 24px;
+  text-align: center;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #8295ab;
+  font-size: 11px;
+}
+
+a { color: #74baff; }
+
+@media (max-width: 650px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .bottom { grid-template-columns: 1fr; }
+  #map { height: 58vh; min-height: 340px; }
+}
+</style>
 </head>
 
 <body>
-  <header>
-    <h1>WORLD RADAR</h1>
-    <p>GLOBAL CRISIS INTELLIGENCE PLATFORM</p>
-  </header>
 
-  <main>
-    <section class="stats">
-      <div class="stat">
-        <div class="stat-label">Séismes détectés</div>
-        <div class="stat-value" id="earthquakeTotal">—</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Magnitude maximale</div>
-        <div class="stat-value" id="maxMagnitude">—</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Volcans répertoriés</div>
-        <div class="stat-value" id="volcanoTotal">—</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Dernière actualisation</div>
-        <div class="stat-value" id="lastUpdate">—</div>
-      </div>
-    </section>
+<header>
+  <h1>WORLD RADAR</h1>
+  <p>GLOBAL CRISIS INTELLIGENCE PLATFORM</p>
+</header>
 
-    <div class="controls">
-      <button id="earthquakeToggle" class="active">🌍 Séismes : ON</button>
-      <button id="volcanoToggle" class="active">🌋 Volcans : ON</button>
-    </div>
+<main>
 
-    <div class="controls">
-      <button class="filter active" data-filter="all">Toutes magnitudes</button>
-      <button class="filter" data-filter="4">Magnitude 4+</button>
-      <button class="filter" data-filter="5">Magnitude 5+</button>
-    </div>
+<section class="stats">
+  <div class="stat">
+    <div class="stat-label">Séismes détectés</div>
+    <div class="stat-value" id="earthquakeTotal">—</div>
+  </div>
 
-    <div id="status">Chargement des données…</div>
-    <div id="map"></div>
+  <div class="stat">
+    <div class="stat-label">Magnitude maximale</div>
+    <div class="stat-value" id="maxMagnitude">—</div>
+  </div>
 
-    <section class="bottom">
-      <div class="panel">
-        <h2>Derniers séismes</h2>
-        <div id="eventList">Chargement…</div>
-      </div>
-      <div class="panel">
-        <h2>À propos des données</h2>
-        <p class="muted">
-          Les séismes proviennent du flux USGS des dernières 24 heures.
-          Les volcans proviennent de la base Smithsonian Global Volcanism
-          Program : ils sont répertoriés comme ayant eu une activité durant
-          l'Holocène. Leur présence sur la carte ne signifie pas qu'ils sont
-          actuellement en éruption.
-        </p>
-        <p class="muted">
-          Sources :
-          <a href="https://earthquake.usgs.gov/" target="_blank">USGS</a> ·
-          <a href="https://volcano.si.edu/" target="_blank">Smithsonian GVP</a> ·
-          <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
-        </p>
-      </div>
-    </section>
-  </main>
+  <div class="stat">
+    <div class="stat-label">Volcans répertoriés</div>
+    <div class="stat-value" id="volcanoTotal">—</div>
+  </div>
 
-  <footer>WORLD RADAR — Données fournies par des sources publiques. Les informations peuvent être incomplètes ou révisées.</footer>
+  <div class="stat">
+    <div class="stat-label">Dernière actualisation</div>
+    <div class="stat-value" id="lastUpdate">—</div>
+  </div>
+</section>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const USGS_URL =
-      "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+<div class="controls">
+  <button id="earthquakeToggle" class="active">
+    🌍 Séismes : ON
+  </button>
 
-    const VOLCANO_URL =
-      "https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GVP-VOTW%3ASmithsonian_VOTW_Holocene_Volcanoes&maxFeatures=2000&outputFormat=application%2Fjson";
+  <button id="volcanoToggle" class="active">
+    🌋 Volcans : ON
+  </button>
+</div>
 
-    const map = L.map("map").setView([20, 0], 2);
+<div class="controls">
+  <button class="filter active" data-filter="all">
+    Toutes magnitudes
+  </button>
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-      maxZoom: 18
-    }).addTo(map);
+  <button class="filter" data-filter="4">
+    Magnitude 4+
+  </button>
 
-    const earthquakeLayer = L.layerGroup().addTo(map);
-    const volcanoLayer = L.layerGroup().addTo(map);
+  <button class="filter" data-filter="5">
+    Magnitude 5+
+  </button>
+</div>
 
-    let earthquakes = [];
-    let currentFilter = "all";
-    let earthquakesVisible = true;
-    let volcanoesVisible = true;
+<div id="earthquakeStatus">Chargement des séismes…</div>
+<div id="volcanoStatus">Chargement des volcans…</div>
 
-    const earthquakeButton = document.getElementById("earthquakeToggle");
-    const volcanoButton = document.getElementById("volcanoToggle");
-    const statusElement = document.getElementById("status");
+<div id="map"></div>
 
-    function safeText(value) {
-      return String(value ?? "Information inconnue");
+<section class="bottom">
+
+  <div class="panel">
+    <h2>Derniers séismes</h2>
+    <div id="eventList">Chargement…</div>
+  </div>
+
+  <div class="panel">
+    <h2>Sources et informations</h2>
+
+    <p class="muted">
+      Les séismes proviennent du flux USGS des dernières 24 heures.
+    </p>
+
+    <p class="muted">
+      Les volcans proviennent d'un inventaire mondial issu du
+      Smithsonian Global Volcanism Program et de NOAA.
+      Leur présence sur la carte ne signifie pas qu'ils sont
+      actuellement en éruption.
+    </p>
+
+    <p class="muted">
+      Sources :
+      <a href="https://earthquake.usgs.gov/" target="_blank">USGS</a> ·
+      <a href="https://volcano.si.edu/" target="_blank">Smithsonian GVP</a> ·
+      <a href="https://www.ncei.noaa.gov/" target="_blank">NOAA</a> ·
+      <a href="https://www.esri.com/" target="_blank">Esri / ArcGIS</a> ·
+      <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+    </p>
+  </div>
+
+</section>
+</main>
+
+<footer>
+WORLD RADAR — Global Crisis Intelligence Platform
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const USGS_URL =
+"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+
+const ARCGIS_LAYER =
+"https://services.arcgis.com/BG6nSlhZSAWtExvp/ArcGIS/rest/services/World_Volcanoes/FeatureServer/0";
+
+const map = L.map("map").setView([20, 0], 2);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors",
+  maxZoom: 18
+}).addTo(map);
+
+const earthquakeLayer = L.layerGroup().addTo(map);
+const volcanoLayer = L.layerGroup().addTo(map);
+
+let earthquakes = [];
+let currentFilter = "all";
+let earthquakesVisible = true;
+let volcanoesVisible = true;
+
+const earthquakeButton = document.getElementById("earthquakeToggle");
+const volcanoButton = document.getElementById("volcanoToggle");
+
+function setText(id, value) {
+  document.getElementById(id).textContent = value;
+}
+
+function safeValue(value) {
+  return value === null || value === undefined || value === ""
+    ? "Non renseigné"
+    : String(value);
+}
+
+function makePopup(lines) {
+  const box = document.createElement("div");
+
+  lines.forEach((line, index) => {
+    const element = document.createElement(index === 0 ? "strong" : "div");
+    element.textContent = line;
+    box.appendChild(element);
+  });
+
+  return box;
+}
+
+function updateButton(button, visible, label) {
+  button.classList.toggle("active", visible);
+  button.textContent = label + (visible ? " : ON" : " : OFF");
+}
+
+function displayEarthquakes() {
+  earthquakeLayer.clearLayers();
+
+  if (!earthquakesVisible) return;
+
+  const visibleEvents = earthquakes.filter(event => {
+    const mag = Number(event.properties.mag) || 0;
+
+    if (currentFilter === "4") return mag >= 4;
+    if (currentFilter === "5") return mag >= 5;
+
+    return true;
+  });
+
+  visibleEvents.forEach(event => {
+    const coordinates = event.geometry?.coordinates;
+
+    if (!coordinates || coordinates.length < 2) return;
+
+    const longitude = Number(coordinates[0]);
+    const latitude = Number(coordinates[1]);
+    const depth = Number(coordinates[2]) || 0;
+    const magnitude = Number(event.properties.mag) || 0;
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+
+    const marker = L.circleMarker([latitude, longitude], {
+      radius: Math.max(4, Math.min(12, magnitude * 2)),
+      color: "#ff9b42",
+      fillColor: "#ff6b35",
+      fillOpacity: 0.8,
+      weight: 1
+    });
+
+    marker.bindPopup(makePopup([
+      safeValue(event.properties.title),
+      "Lieu : " + safeValue(event.properties.place),
+      "Magnitude : " + magnitude.toFixed(1),
+      "Profondeur : " + depth + " km",
+      "Date : " + new Date(event.properties.time).toLocaleString("fr-FR")
+    ]));
+
+    earthquakeLayer.addLayer(marker);
+  });
+}
+
+async function loadEarthquakes() {
+  try {
+    const response = await fetch(USGS_URL);
+
+    if (!response.ok) {
+      throw new Error("USGS HTTP " + response.status);
     }
 
-    function setStatus(message) {
-      statusElement.textContent = message;
+    const data = await response.json();
+
+    if (!Array.isArray(data.features)) {
+      throw new Error("Format USGS incorrect");
     }
 
-    function updateButton(button, visible, label) {
-      button.classList.toggle("active", visible);
-      button.textContent = label + (visible ? " : ON" : " : OFF");
-    }
+    earthquakes = data.features;
 
-    function displayEarthquakes() {
-      earthquakeLayer.clearLayers();
+    setText("earthquakeTotal", earthquakes.length);
 
-      const visibleEvents = earthquakes.filter(event => {
-        const magnitude = Number(event.properties.mag) || 0;
+    const magnitudes = earthquakes
+      .map(item => Number(item.properties.mag))
+      .filter(value => Number.isFinite(value));
 
-        if (currentFilter === "4") return magnitude >= 4;
-        if (currentFilter === "5") return magnitude >= 5;
-        return true;
+    setText(
+      "maxMagnitude",
+      magnitudes.length ? Math.max(...magnitudes).toFixed(1) : "—"
+    );
+
+    displayEarthquakes();
+
+    setText("lastUpdate", new Date().toLocaleTimeString("fr-FR"));
+
+    const list = document.getElementById("eventList");
+    list.replaceChildren();
+
+    [...earthquakes]
+      .sort((a, b) => b.properties.time - a.properties.time)
+      .slice(0, 15)
+      .forEach(event => {
+        const item = document.createElement("div");
+        item.className = "event";
+
+        const magnitude = Number(event.properties.mag);
+        item.textContent =
+          "M" + (Number.isFinite(magnitude) ? magnitude.toFixed(1) : "?") +
+          " — " + safeValue(event.properties.place) +
+          " — " + new Date(event.properties.time).toLocaleString("fr-FR");
+
+        list.appendChild(item);
       });
 
-      if (!earthquakesVisible) return;
+    setText(
+      "earthquakeStatus",
+      "USGS : " + earthquakes.length + " séismes chargés."
+    );
 
-      visibleEvents.forEach(event => {
-        const coordinates = event.geometry?.coordinates;
-        if (!coordinates || coordinates.length < 2) return;
+  } catch (error) {
+    console.error("Erreur USGS :", error);
+    setText("earthquakeStatus", "Erreur séismes : " + error.message);
+  }
+}
 
-        const longitude = Number(coordinates[0]);
-        const latitude = Number(coordinates[1]);
-        const depth = Number(coordinates[2]) || 0;
-        const magnitude = Number(event.properties.mag) || 0;
+function getAttribute(attributes, pattern) {
+  const key = Object.keys(attributes).find(name => pattern.test(name));
+  return key ? attributes[key] : null;
+}
+
+async function loadVolcanoes() {
+  try {
+    setText("volcanoStatus", "Récupération de l'inventaire volcanique…");
+
+    const idsURL = new URL(ARCGIS_LAYER + "/query");
+
+    idsURL.search = new URLSearchParams({
+      where: "1=1",
+      returnIdsOnly: "true",
+      f: "json"
+    }).toString();
+
+    const idsResponse = await fetch(idsURL);
+    if (!idsResponse.ok) {
+      throw new Error("ArcGIS IDs HTTP " + idsResponse.status);
+    }
+
+    const idsData = await idsResponse.json();
+
+    if (!Array.isArray(idsData.objectIds)) {
+      throw new Error(idsData.error?.message || "Liste des identifiants absente");
+    }
+
+    const ids = idsData.objectIds;
+    const batchSize = 400;
+
+    volcanoLayer.clearLayers();
+
+    let count = 0;
+
+    for (let start = 0; start < ids.length; start += batchSize) {
+      const batch = ids.slice(start, start + batchSize);
+
+      const queryURL = new URL(ARCGIS_LAYER + "/query");
+
+      queryURL.search = new URLSearchParams({
+        objectIds: batch.join(","),
+        outFields: "*",
+        returnGeometry: "true",
+        outSR: "4326",
+        f: "json"
+      }).toString();
+
+      const response = await fetch(queryURL);
+
+      if (!response.ok) {
+        throw new Error("ArcGIS données HTTP " + response.status);
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error.message || "Erreur ArcGIS");
+      }
+
+      if (!Array.isArray(data.features)) {
+        throw new Error("Format des volcans inattendu");
+      }
+
+      data.features.forEach(feature => {
+        const attributes = feature.attributes || {};
+        const geometry = feature.geometry;
+
+        if (!geometry) return;
+
+        const longitude = Number(geometry.x);
+        const latitude = Number(geometry.y);
 
         if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
 
-        const marker = L.circleMarker([latitude, longitude], {
-          radius: Math.max(4, Math.min(12, magnitude * 2)),
-          color: "#ff9b42",
-          fillColor: "#ff6b35",
-          fillOpacity: 0.8,
-          weight: 1
-        });
-
-        const title = safeText(event.properties.title);
-        const place = safeText(event.properties.place);
-        const date = new Date(event.properties.time).toLocaleString("fr-FR");
-
-        marker.bindPopup(
-          "<strong>" + title + "</strong><br>" +
-          "Lieu : " + place + "<br>" +
-          "Magnitude : " + magnitude.toFixed(1) + "<br>" +
-          "Profondeur : " + depth + " km<br>" +
-          "Date : " + date +
-          (event.properties.url
-            ? '<br><a href="' + event.properties.url + '" target="_blank">Source USGS</a>'
-            : "")
+        const name = getAttribute(
+          attributes,
+          /volcano.*name|^name$/i
         );
 
-        earthquakeLayer.addLayer(marker);
+        const country = getAttribute(
+          attributes,
+          /country|nation/i
+        );
+
+        const eruption = getAttribute(
+          attributes,
+          /last.*eruption|eruption.*year/i
+        );
+
+        const icon = L.divIcon({
+          className: "",
+          html: '<div class="volcano-icon">🌋</div>',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        const marker = L.marker([latitude, longitude], { icon });
+
+        marker.bindPopup(makePopup([
+          safeValue(name || "Volcan"),
+          "Pays : " + safeValue(country),
+          "Dernière éruption répertoriée : " + safeValue(eruption),
+          "Inventaire : Smithsonian GVP / NOAA via ArcGIS"
+        ]));
+
+        volcanoLayer.addLayer(marker);
+        count++;
       });
+
+      setText(
+        "volcanoStatus",
+        "Chargement des volcans : " + count + " / " + ids.length
+      );
     }
 
-    async function loadEarthquakes() {
-      try {
-        const response = await fetch(USGS_URL);
-        if (!response.ok) throw new Error("Réponse USGS : " + response.status);
-
-        const data = await response.json();
-        if (!Array.isArray(data.features)) {
-          throw new Error("Format USGS inattendu");
-        }
-
-        earthquakes = data.features;
-
-        document.getElementById("earthquakeTotal").textContent =
-          earthquakes.length;
-
-        const magnitudes = earthquakes
-          .map(event => Number(event.properties.mag))
-          .filter(value => Number.isFinite(value));
-
-        document.getElementById("maxMagnitude").textContent =
-          magnitudes.length ? Math.max(...magnitudes).toFixed(1) : "—";
-
-        displayEarthquakes();
-        document.getElementById("lastUpdate").textContent =
-          new Date().toLocaleTimeString("fr-FR");
-
-        const latest = [...earthquakes]
-          .sort((a, b) => b.properties.time - a.properties.time)
-          .slice(0, 15);
-
-        const list = document.getElementById("eventList");
-        list.replaceChildren();
-
-        latest.forEach(event => {
-          const item = document.createElement("div");
-          item.className = "event";
-
-          const magnitude = Number(event.properties.mag);
-          const date = new Date(event.properties.time).toLocaleString("fr-FR");
-
-          item.textContent =
-            "M" + (Number.isFinite(magnitude) ? magnitude.toFixed(1) : "?") +
-            " — " + safeText(event.properties.place) + " — " + date;
-
-          list.appendChild(item);
-        });
-
-        setStatus("Séismes : " + earthquakes.length +
-          " événements reçus. Actualisation automatique toutes les 5 minutes.");
-      } catch (error) {
-        console.error("Erreur USGS :", error);
-        setStatus("Erreur de chargement des séismes : " + error.message);
-      }
+    if (count === 0) {
+      throw new Error("Aucun volcan avec coordonnées valides");
     }
 
-    async function loadVolcanoes() {
-      try {
-        const response = await fetch(VOLCANO_URL);
+    setText("volcanoTotal", count);
+    setText("volcanoStatus", "Inventaire volcanique chargé : " + count + " volcans.");
 
-        if (!response.ok) {
-          throw new Error("Réponse Smithsonian : " + response.status);
-        }
+  } catch (error) {
+    console.error("Erreur volcans :", error);
+    setText("volcanoTotal", "Erreur");
+    setText("volcanoStatus", "Erreur de chargement des volcans : " + error.message);
+  }
+}
 
-        const data = await response.json();
+earthquakeButton.addEventListener("click", () => {
+  earthquakesVisible = !earthquakesVisible;
 
-        if (!Array.isArray(data.features)) {
-          throw new Error("Le flux ne contient pas de tableau features");
-        }
+  if (earthquakesVisible) {
+    map.addLayer(earthquakeLayer);
+  } else {
+    map.removeLayer(earthquakeLayer);
+  }
 
-        volcanoLayer.clearLayers();
-        let validVolcanoes = 0;
+  updateButton(earthquakeButton, earthquakesVisible, "🌍 Séismes");
+  displayEarthquakes();
+});
 
-        data.features.forEach(feature => {
-          const properties = feature.properties || {};
-          const coordinates = feature.geometry?.coordinates;
+volcanoButton.addEventListener("click", () => {
+  volcanoesVisible = !volcanoesVisible;
 
-          if (!coordinates || coordinates.length < 2) return;
+  if (volcanoesVisible) {
+    map.addLayer(volcanoLayer);
+  } else {
+    map.removeLayer(volcanoLayer);
+  }
 
-          const longitude = Number(coordinates[0]);
-          const latitude = Number(coordinates[1]);
+  updateButton(volcanoButton, volcanoesVisible, "🌋 Volcans");
+});
 
-          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+document.querySelectorAll(".filter").forEach(button => {
+  button.addEventListener("click", () => {
+    currentFilter = button.dataset.filter;
 
-          const name = safeText(properties.Volcano_Name);
-          const country = safeText(properties.Country);
-          const lastEruption = properties.Last_Eruption_Year;
-
-          const icon = L.divIcon({
-            className: "",
-            html: '<div class="volcano-icon">🌋</div>',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
-          });
-
-          const marker = L.marker([latitude, longitude], { icon });
-
-          marker.bindPopup(
-            "<strong>" + name + "</strong><br>" +
-            "Pays : " + country + "<br>" +
-            "Dernière éruption répertoriée : " +
-            safeText(lastEruption ?? "Non datée") +
-            "<br><small>Source : Smithsonian GVP</small>"
-          );
-
-          volcanoLayer.addLayer(marker);
-          validVolcanoes++;
-        });
-
-        document.getElementById("volcanoTotal").textContent =
-          validVolcanoes;
-
-        if (validVolcanoes === 0) {
-          throw new Error("Aucun volcan avec coordonnées valides");
-        }
-
-        setStatus("Données volcaniques chargées : " + validVolcanoes +
-          " volcans répertoriés.");
-      } catch (error) {
-        console.error("Erreur Smithsonian :", error);
-        document.getElementById("volcanoTotal").textContent = "Erreur";
-        setStatus("Les volcans n'ont pas pu être chargés : " +
-          error.message + ". Vérifie la connexion ou l'accès au flux.");
-      }
-    }
-
-    earthquakeButton.addEventListener("click", () => {
-      earthquakesVisible = !earthquakesVisible;
-
-      if (earthquakesVisible) {
-        map.addLayer(earthquakeLayer);
-      } else {
-        map.removeLayer(earthquakeLayer);
-      }
-
-      updateButton(earthquakeButton, earthquakesVisible, "🌍 Séismes");
-      displayEarthquakes();
+    document.querySelectorAll(".filter").forEach(item => {
+      item.classList.remove("active");
     });
 
-    volcanoButton.addEventListener("click", () => {
-      volcanoesVisible = !volcanoesVisible;
+    button.classList.add("active");
+    displayEarthquakes();
+  });
+});
 
-      if (volcanoesVisible) {
-        map.addLayer(volcanoLayer);
-      } else {
-        map.removeLayer(volcanoLayer);
-      }
+loadEarthquakes();
+loadVolcanoes();
 
-      updateButton(volcanoButton, volcanoesVisible, "🌋 Volcans");
-    });
-
-    document.querySelectorAll(".filter").forEach(button => {
-      button.addEventListener("click", () => {
-        currentFilter = button.dataset.filter;
-
-        document.querySelectorAll(".filter").forEach(item => {
-          item.classList.remove("active");
-        });
-
-        button.classList.add("active");
-        displayEarthquakes();
-      });
-    });
-
-    loadEarthquakes();
-    loadVolcanoes();
-
-    setInterval(loadEarthquakes, 5 * 60 * 1000);
-  </script>
+setInterval(loadEarthquakes, 5 * 60 * 1000);
+</script>
 </body>
 </html>
