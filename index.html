@@ -50,3 +50,561 @@ footer{border-top:1px solid var(--line);padding:20px;text-align:center;color:#72
   <div class="stat"><small>Séismes / 24 h</small><strong id="quakeCount">—</strong><em>Flux officiel USGS</em></div>
   <div class="stat"><small>Dernière mise à jour</small><strong id="updated">—</strong><em id="dataState">Initialisation des flux</em></div>
  </section>
+ <div class="layout">
+  <div>
+   <section class="panel">
+    <div class="panelhead"><div><div class="eyebrow">Géographie des événements</div><h3>Carte mondiale de situation</h3></div><div class="actions"><button class="btn" id="toggleQuakes">Séismes : ON</button><button class="btn" id="toggleMapNews">Articles géolocalisés : ON</button></div></div>
+    <div id="map"></div><div class="mapnote">Les marqueurs d’actualité sont des repères géographiques approximatifs lorsque le lieu est explicitement cité dans le titre. Ils ne représentent pas une position tactique ou une localisation vérifiée.</div>
+   </section>
+   <section class="panel">
+    <div class="feedhead"><div><div class="eyebrow">Flux internationaux</div><h3>Radar d’actualité</h3></div><span class="muted" id="resultInfo">En attente du flux…</span></div>
+    <div class="toolbar" id="filters">
+     <button class="chip active" data-cat="all">Tout</button><button class="chip" data-cat="conflict">Conflits</button><button class="chip" data-cat="diplomacy">Diplomatie</button><button class="chip" data-cat="security">Sécurité</button><button class="chip" data-cat="politics">Politique</button><button class="chip" data-cat="economy">Économie</button><button class="chip" data-cat="humanitarian">Humanitaire</button><button class="chip" data-cat="maritime">Maritime</button><button class="chip" data-cat="cyber">Cyber</button><button class="chip" data-cat="environment">Risques naturels</button>
+    </div>
+    <div id="feedStatus" class="status">Connexion au flux international…</div>
+    <div id="stories" class="feedlist"><div class="empty">Les actualités vont apparaître ici.</div></div>
+    <div id="fallback" class="fallback"><div class="status warn">Mode de secours : affichage direct du flux GDELT. Les liens des titres restent accessibles même si le chargement automatique du tableau échoue.</div><iframe id="fallbackFrame" title="Flux international de secours" loading="lazy"></iframe></div>
+   </section>
+  </div>
+  <aside>
+   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Niveaux indicatifs</div><h3>Veille des alertes</h3></div></div><div class="muted">Le niveau est déduit automatiquement du vocabulaire des titres. Ce n’est ni une évaluation officielle ni une mesure du danger réel.</div>
+    <div id="alerts" style="margin-top:12px"><div class="empty">En attente des articles.</div></div>
+   </section>
+   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Activité tellurique</div><h3>Derniers séismes</h3></div><a class="read" href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener">Carte USGS ↗</a></div><div id="quakeStatus" class="status">Chargement USGS…</div><div id="earthquakeList"></div></section>
+   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Accès rapide</div><h3>Recherches par thème</h3></div></div><div id="quickSearch"></div></section>
+  </aside>
+ </div>
+ <section class="section" id="sources">
+  <div class="sectiontitle"><div><div class="eyebrow">Sources primaires et institutionnelles</div><h3>Accès direct aux organismes</h3><p class="muted">Portails officiels, communiqués, rapports et données. Les sites sources peuvent publier dans plusieurs langues.</p></div></div>
+  <div class="sources" id="sourceGrid"></div>
+ </section>
+ <section class="section panel">
+  <div class="sectiontitle"><div><div class="eyebrow">Transparence</div><h3>Sources, limites et méthode</h3></div></div>
+  <p class="muted">WORLD RADAR agrège des titres et liens publics. GDELT est un index médiatique mondial, pas une agence de vérification. Le classement thématique et les niveaux d’alerte sont calculés localement à partir des titres : ils peuvent se tromper. Les articles restent la propriété de leurs éditeurs et s’ouvrent sur les sites d’origine.</p>
+  <p class="muted">Le flux de secours utilise l’affichage HTML officiel de GDELT dans un cadre intégré. Si une API ou un réseau bloque l’accès, les portails institutionnels et les recherches thématiques restent accessibles. Un site statique GitHub Pages ne peut pas garantir la disponibilité de services externes ni contourner les blocages réseau.</p>
+  <p class="muted">Données sismiques : USGS. Fond cartographique : OpenStreetMap. Articles : GDELT et liens vers les éditeurs. Pas de volcano-monitoring.</p>
+ </section>
+</main>
+<footer>WORLD RADAR · GLOBAL CRISIS & INTELLIGENCE MONITOR<br>Outil indépendant de veille en sources ouvertes — ne constitue pas une source officielle de renseignement.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const GDELT="https://api.gdeltproject.org/api/v2/doc/doc";
+const USGS="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+const TOPIC_QUERY='(war OR warfare OR conflict OR invasion OR airstrike OR missile OR diplomacy OR diplomatic OR negotiation OR summit OR sanctions OR security OR terrorism OR attack OR election OR government OR parliament OR economy OR energy OR oil OR trade OR humanitarian OR refugee OR famine OR aid OR shipping OR maritime OR naval OR cyber OR ransomware OR earthquake OR flood OR wildfire OR guerre OR conflit OR invasion OR diplomatie OR négociation OR sommet OR sanctions OR sécurité OR attentat OR attaque OR élections OR gouvernement OR économie OR énergie OR pétrole OR commerce OR humanitaire OR réfugiés OR famine OR maritime OR cyber OR séisme OR inondation)';
+const CATS={
+ conflict:{label:"Conflits",terms:/war|warfare|conflict|invasion|airstrike|missile|bombard|military operation|armed forces|fighting|clash|guerre|conflit|invasion|frappe|missile|bombard|armée|militaire|combats|affrontements/i},
+ diplomacy:{label:"Diplomatie",terms:/diplomac|negotiat|peace talks|summit|treaty|embassy|foreign minister|bilateral|diplomatie|négociation|pourparler|sommet|traité|ambassade|ministre des affaires étrangères|accord de paix/i},
+ security:{label:"Sécurité",terms:/security|terror|attack|explosion|hostage|border|insurg|police|intelligence|sécurité|terror|attentat|attaque|explosion|otage|frontière|insurrection|renseignement/i},
+ politics:{label:"Politique",terms:/election|government|parliament|president|minister|protest|coup|political crisis|élection|gouvernement|parlement|président|ministre|manifestation|coup d'état|crise politique/i},
+ economy:{label:"Économie",terms:/econom|market|trade|tariff|sanction|oil|gas|energy|inflation|currency|econom|marché|commerce|droit de douane|pétrole|gaz|énergie|inflation|monnaie/i},
+ humanitarian:{label:"Humanitaire",terms:/humanitarian|refugee|displaced|famine|food crisis|aid convoy|relief|humanitaire|réfugié|déplacé|famine|crise alimentaire|aide d'urgence/i},
+ maritime:{label:"Maritime",terms:/maritime|shipping|vessel|ship|naval|strait|red sea|hormuz|piracy|port|mer rouge|détroit|navire|marine|piraterie|portuaire/i},
+ cyber:{label:"Cyber",terms:/cyber|ransomware|hack|hacker|data breach|malware|phishing|cyberattaque|piratage|rançongiciel|fuite de données|logiciel malveillant/i},
+ environment:{label:"Risques naturels",terms:/earthquake|quake|flood|wildfire|hurricane|cyclone|storm|drought|landslide|séisme|inondation|incendie|ouragan|cyclone|tempête|sécheresse|glissement de terrain/i}
+};
+const SOURCES=[
+ ["ONU / UN News","Actualités, déclarations et couverture des réunions internationales.","https://news.un.org/fr/"],
+ ["Conseil de sécurité ONU","Résolutions, réunions, sanctions et communiqués officiels.","https://www.un.org/securitycouncil/"],
+ ["ONU Genève","Droits humains, désarmement, aide et actualités internationales.","https://www.ungeneva.org/fr/news-media"],
+ ["Conseil de l’Union européenne","Diplomatie, affaires étrangères, sanctions et décisions.","https://www.consilium.europa.eu/fr/press/press-releases/"],
+ ["Service européen pour l’action extérieure","Déclarations diplomatiques et politique étrangère de l’UE.","https://www.eeas.europa.eu/"],
+ ["OTAN","Communiqués, opérations, exercices et sécurité euro-atlantique.","https://www.nato.int/cps/fr/natohq/news.htm"],
+ ["ReliefWeb / OCHA","Rapports humanitaires, urgences, déplacements et cartes.","https://reliefweb.int/"],
+ ["ACLED","Données et analyses sur les conflits et violences politiques.","https://acleddata.com/"],
+ ["USGS Earthquake Hazards","Données sismiques mondiales en temps réel.","https://earthquake.usgs.gov/earthquakes/map/"],
+ ["Banque mondiale","Économie, développement, commerce et rapports pays.","https://www.worldbank.org/en/news"],
+ ["Fonds monétaire international","Stabilité financière, économie mondiale et analyses.","https://www.imf.org/en/News"],
+ ["Agence internationale de l’énergie","Énergie, pétrole, gaz et sécurité énergétique.","https://www.iea.org/news"],
+ ["Organisation maritime internationale","Sécurité maritime, navigation et réglementation.","https://www.imo.org/en/MediaCentre/Pages/Default.aspx"],
+ ["CISA — Cybersecurity","Alertes et avis techniques de cybersécurité.","https://www.cisa.gov/news-events/cybersecurity-advisories"],
+ ["Centre de situation maritime UE","Politique et sécurité maritime européennes.","https://www.eeas.europa.eu/eeas/maritime-security_en"],
+ ["GDELT Project","Index mondial d’articles et de médias, multilingue.","https://www.gdeltproject.org/"]
+];
+const SEARCHES=[
+ ["Conflits armés","war OR armed conflict OR fighting OR invasion"],
+ ["Diplomatie","diplomacy OR negotiations OR summit OR peace talks"],
+ ["Sécurité","terrorism OR security OR attack OR border tensions"],
+ ["Politique","elections OR government OR parliament OR political crisis"],
+ ["Économie & énergie","economy OR oil OR gas OR energy OR sanctions"],
+ ["Crises humanitaires","humanitarian OR refugees OR famine OR displacement"],
+ ["Maritime","shipping OR naval OR Red Sea OR Strait of Hormuz"],
+ ["Cyber","cyberattack OR ransomware OR hacking OR data breach"]
+];
+ let articles=[],activeCat="all",quakes=[],mapObj=null,quakeLayer=null,newsLayer=null,showQuakes=true,showNews=true;
+
+function domain(url){try{return new URL(url).hostname.replace(/^www\./,"")}catch{return "Source"}}
+
+function fmtDate(raw){
+ if(!raw)return "Date non précisée";
+ if(/^\d{14}$/.test(String(raw))){
+  const s=String(raw);
+  return new Date(Date.UTC(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8),+s.slice(8,10),+s.slice(10,12),+s.slice(12,14))).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short",timeZone:"UTC"})+" UTC";
+ }
+ const d=new Date(raw);
+ return isNaN(d)?"Date non précisée":d.toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"});
+}
+
+function classify(a){
+ const t=(a.title||"")+" "+(a.domain||"");
+ for(const [key,v] of Object.entries(CATS)){
+  if(v.terms.test(t))return key;
+ }
+ return "politics";
+}
+
+function severity(title){
+ const t=String(title||"").toLowerCase();
+ if(/nuclear strike|declaration of war|invasion begins|coup d'état|attaque nucléaire|déclaration de guerre|invasion terrestre|coup d'état/.test(t))return 3;
+ if(/airstrike|missile|bombing|massacre|terrorist attack|offensive|frappe|missile|bombardement|massacre|attentat|offensive|combats/.test(t))return 2;
+ if(/tension|sanction|mobilisation|crisis|alert|tensions|sanction|mobilisation|crise|alerte/.test(t))return 1;
+ return 0;
+}
+
+function setStatus(message,kind=""){
+ const el=$("feedStatus");
+ el.className="status "+kind;
+ el.textContent=message;
+}
+
+function buildGdeltUrl(format="json",query=TOPIC_QUERY){
+ const p=new URLSearchParams({
+  query,mode:"ArtList",format,maxrecords:"250",timespan:"7d",sort:"DateDesc"
+ });
+ return GDELT+"?"+p.toString();
+}
+
+async function fetchWithTimeout(url,ms=18000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),ms);
+ try{
+  return await fetch(url,{
+   signal:controller.signal,
+   cache:"no-store",
+   headers:{Accept:"application/json"}
+  });
+ }finally{
+  clearTimeout(timer);
+ }
+}
+
+async function loadNews(){
+ const button=$("refresh");
+ button.disabled=true;
+ button.textContent="Collecte…";
+ setStatus("Interrogation du flux mondial GDELT…");
+
+ try{
+  const res=await fetchWithTimeout(buildGdeltUrl(),20000);
+  if(!res.ok)throw new Error("Réponse HTTP "+res.status);
+
+  const raw=await res.text();
+  let data;
+  try{data=JSON.parse(raw)}
+  catch{throw new Error("La source n’a pas renvoyé de JSON exploitable");}
+
+  if(!Array.isArray(data.articles))
+   throw new Error("Format de réponse inattendu");
+
+  const seen=new Set();
+  articles=data.articles
+   .filter(a=>a&&a.title&&a.url&&!seen.has(a.url)&&(seen.add(a.url),true))
+   .map(a=>({...a,_cat:classify(a),_severity:severity(a.title)}));
+
+  articles.sort((a,b)=>String(b.seendate||"").localeCompare(String(a.seendate||"")));
+
+  $("articleCount").textContent=articles.length;
+  $("alertCount").textContent=articles.filter(a=>a._severity>=2).length;
+  $("updated").textContent=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  $("dataState").textContent="GDELT · 7 derniers jours";
+  $("resultInfo").textContent=articles.length+" articles reçus";
+
+  setStatus(
+   articles.length
+    ?"Flux reçu. Les titres sont classés localement ; ouvre « Lire la source » pour consulter chaque publication originale."
+    :"Le flux a répondu mais aucun article n’a été retourné.",
+   articles.length?"good":"warn"
+  );
+
+  renderStories();
+  renderAlerts();
+  renderMarkers();
+  $("fallback").classList.remove("visible");
+
+ }catch(err){
+  console.error(err);
+  setStatus(
+   "Le flux automatique est indisponible ("+
+   (err.name==="AbortError"?"délai dépassé":err.message)+
+   "). Le mode de secours et les portails officiels restent accessibles ci-dessous.",
+   "error"
+  );
+
+  $("dataState").textContent="Mode de secours";
+  $("fallback").classList.add("visible");
+  $("fallbackFrame").src=buildGdeltUrl("html");
+
+  if(!articles.length){
+   $("stories").innerHTML='<div class="empty">Le service automatique ne répond pas pour le moment. Le flux de secours ci-dessous et les liens institutionnels restent utilisables.</div>';
+  }
+
+ }finally{
+  button.disabled=false;
+  button.textContent="↻ Actualiser les données";
+ }
+}
+
+function renderStories(){
+ const box=$("stories");
+ box.replaceChildren();
+
+ const list=articles
+  .filter(a=>activeCat==="all"||a._cat===activeCat)
+  .slice(0,100);
+
+ if(!list.length){
+  box.innerHTML='<div class="empty">Aucun article dans cette rubrique pour le moment. Essaie « Tout » ou ouvre la recherche thématique.</div>';
+  return;
+ }
+
+ list.forEach(a=>{
+  const card=document.createElement("article");
+  card.className="story";
+
+  const title=document.createElement("h4");
+  title.textContent=a.title;
+
+  const meta=document.createElement("div");
+  meta.className="meta";
+  meta.textContent=domain(a.url)+" · "+fmtDate(a.seendate);
+
+  const foot=document.createElement("div");
+  foot.className="storyfoot";
+
+  const tag=document.createElement("span");
+  tag.className="tag "+a._cat;
+  tag.textContent=CATS[a._cat]?.label||"Actualité";
+
+  const link=document.createElement("a");
+  link.className="read";
+  link.href=a.url;
+  link.target="_blank";
+  link.rel="noopener noreferrer";
+  link.textContent="Lire la source ↗";
+
+  foot.append(tag,link);
+  card.append(meta,title,foot);
+  box.append(card);
+ });
+}
+
+function renderAlerts(){
+ const box=$("alerts");
+ box.replaceChildren();
+
+ const high=articles
+  .filter(a=>a._severity>0)
+  .sort((a,b)=>b._severity-a._severity)
+  .slice(0,8);
+
+ if(!high.length){
+  box.innerHTML='<div class="empty">Aucune alerte prioritaire détectée dans les titres reçus.</div>';
+  return;
+ }
+
+ high.forEach(a=>{
+  const d=document.createElement("div");
+  d.className="sidebox";
+
+  const h=document.createElement("h4");
+  h.textContent=
+   (a._severity===3?"● CRITIQUE":a._severity===2?"● ÉLEVÉ":"● À SURVEILLER")
+   +" — "+a.title;
+
+  const p=document.createElement("p");
+  p.textContent=domain(a.url)+" · "+fmtDate(a.seendate);
+
+  const l=document.createElement("a");
+  l.href=a.url;
+  l.target="_blank";
+  l.rel="noopener noreferrer";
+  l.textContent="Ouvrir la publication ↗";
+
+  d.append(h,p,l);
+  box.append(d);
+ });
+}
+
+const PLACES=[
+ [["kyiv","kiev"],"Kyiv",50.45,30.52],
+ [["moscow","moscou"],"Moscou",55.75,37.62],
+ [["gaza"],"Gaza",31.5,34.47],
+ [["tel aviv"],"Tel-Aviv",32.08,34.78],
+ [["tehran","téhéran"],"Téhéran",35.69,51.39],
+ [["beirut","beyrouth"],"Beyrouth",33.89,35.5],
+ [["damascus","damas"],"Damas",33.51,36.28],
+ [["taiwan","taïwan"],"Taïwan",23.7,120.96],
+ [["khartoum"],"Khartoum",15.5,32.56],
+ [["sudan","soudan"],"Soudan",12.86,30.22],
+ [["ukraine"],"Ukraine",48.38,31.17],
+ [["russia","russie"],"Russie",61.52,105.32],
+ [["iran"],"Iran",32.43,53.69],
+ [["red sea","mer rouge"],"Mer Rouge",20,38],
+ [["strait of hormuz","détroit d'ormuz"],"Détroit d'Ormuz",26.5,56.5],
+ [["paris"],"Paris",48.86,2.35],
+ [["washington"],"Washington",38.91,-77.04]
+];
+
+function initMap(){
+ if(!window.L){
+  $("map").innerHTML='<div class="empty">La bibliothèque cartographique ne s’est pas chargée. Les cartes restent accessibles sur <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a>.</div>';
+  return;
+ }
+
+ mapObj=L.map("map",{worldCopyJump:true}).setView([20,0],2);
+
+ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+  maxZoom:18,
+  attribution:"© OpenStreetMap"
+ }).addTo(mapObj);
+
+ quakeLayer=L.layerGroup().addTo(mapObj);
+ newsLayer=L.layerGroup().addTo(mapObj);
+}
+
+function renderMarkers(){
+ if(!newsLayer)return;
+ newsLayer.clearLayers();
+ if(!showNews)return;
+
+ const done=new Set();
+
+ articles.slice(0,100).forEach(a=>{
+  const t=(a.title||"").toLowerCase();
+  const p=PLACES.find(x=>x[0].some(n=>t.includes(n)));
+
+  if(!p||done.has(p[1]))return;
+  done.add(p[1]);
+
+  const m=L.circleMarker([p[2],p[3]],{
+   radius:7,
+   color:"#fff",
+   weight:1,
+   fillColor:"#4ba3ff",
+   fillOpacity:.9
+  });
+
+  const pop=document.createElement("div");
+  const strong=document.createElement("strong");
+  strong.textContent=a.title;
+
+  const link=document.createElement("a");
+  link.href=a.url;
+  link.target="_blank";
+  link.rel="noopener noreferrer";
+  link.textContent="Lire la source ↗";
+
+  pop.append(strong,document.createElement("br"),link);
+  m.bindPopup(pop);
+  newsLayer.addLayer(m);
+ });
+}
+
+async function loadQuakes(){
+ try{
+  let r=await fetchWithTimeout(USGS,15000);
+  if(!r.ok)throw new Error("USGS HTTP "+r.status);
+
+  let d=await r.json();
+  if(!Array.isArray(d.features))throw new Error("Format GeoJSON incorrect");
+
+  quakes=d.features;
+  $("quakeCount").textContent=quakes.length;
+  $("quakeStatus").textContent=quakes.length+" séismes reçus depuis le flux officiel USGS.";
+
+  const list=$("earthquakeList");
+  list.replaceChildren();
+
+  quakes.slice()
+   .sort((a,b)=>b.properties.time-a.properties.time)
+   .slice(0,14)
+   .forEach(q=>{
+    const row=document.createElement("div");
+    row.className="quake";
+
+    const mag=Number(q.properties.mag);
+    const link=document.createElement("a");
+    link.href=q.properties.url;
+    link.target="_blank";
+    link.rel="noopener noreferrer";
+    link.textContent="M"+(Number.isFinite(mag)?mag.toFixed(1):"?")+" — "+q.properties.place+" ↗";
+
+    row.append(
+     link,
+     document.createElement("br"),
+     document.createTextNode(new Date(q.properties.time).toLocaleString("fr-FR"))
+    );
+
+    list.append(row);
+   });
+
+  drawQuakes();
+
+ }catch(e){
+  $("quakeStatus").textContent=
+   "Flux USGS indisponible : "+e.message+". Ouvre la carte officielle USGS.";
+
+  $("quakeCount").textContent="—";
+
+  $("earthquakeList").innerHTML=
+   '<a href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener">Consulter les séismes sur la carte USGS ↗</a>';
+ }
+}
+
+function drawQuakes(){
+ if(!quakeLayer)return;
+ quakeLayer.clearLayers();
+ if(!showQuakes)return;
+
+ quakes.forEach(q=>{
+  const c=q.geometry?.coordinates;
+  if(!c)return;
+
+  const mag=Number(q.properties.mag)||0;
+
+  const m=L.circleMarker([c[1],c[0]],{
+   radius:Math.max(3,Math.min(12,mag*2)),
+   color:"#ffbd73",
+   fillColor:"#ff6b35",
+   fillOpacity:.85,
+   weight:1
+  });
+
+  const pop=document.createElement("div");
+  const b=document.createElement("strong");
+  b.textContent=q.properties.title;
+
+  const a=document.createElement("a");
+  a.href=q.properties.url;
+  a.target="_blank";
+  a.rel="noopener noreferrer";
+  a.textContent="Détails USGS ↗";
+
+  pop.append(b,document.createElement("br"),a);
+  m.bindPopup(pop);
+  quakeLayer.addLayer(m);
+ });
+}
+
+function renderSources(){
+ const box=$("sourceGrid");
+
+ SOURCES.forEach(s=>{
+  const d=document.createElement("div");
+  d.className="source";
+
+  const b=document.createElement("strong");
+  b.textContent=s[0];
+
+  const p=document.createElement("span");
+  p.textContent=s[1];
+
+  const a=document.createElement("a");
+  a.href=s[2];
+  a.target="_blank";
+  a.rel="noopener noreferrer";
+  a.textContent="Accéder au site ↗";
+
+  d.append(b,p,a);
+  box.append(d);
+ });
+}
+
+function renderSearches(){
+ const box=$("quickSearch");
+
+ SEARCHES.forEach(s=>{
+  const d=document.createElement("div");
+  d.className="sidebox";
+
+  const b=document.createElement("h4");
+  b.textContent=s[0];
+
+  const a=document.createElement("a");
+  a.href="https://www.google.com/search?tbm=nws&q="+encodeURIComponent(s[1]);
+  a.target="_blank";
+  a.rel="noopener noreferrer";
+  a.textContent="Articles récents ↗";
+
+  const g=document.createElement("a");
+  g.href=buildGdeltUrl("html",'('+s[1]+')');
+  g.target="_blank";
+  g.rel="noopener noreferrer";
+  g.textContent="Recherche GDELT ↗";
+
+  d.append(b,a,g);
+  box.append(d);
+ });
+}
+
+$("filters").addEventListener("click",e=>{
+ const b=e.target.closest("button[data-cat]");
+ if(!b)return;
+
+ activeCat=b.dataset.cat;
+
+ document.querySelectorAll(".chip").forEach(x=>
+  x.classList.toggle("active",x===b)
+ );
+
+ renderStories();
+});
+
+$("refresh").addEventListener("click",()=>{
+ loadNews();
+ loadQuakes();
+});
+
+$("toggleQuakes").addEventListener("click",e=>{
+ showQuakes=!showQuakes;
+ e.currentTarget.textContent="Séismes : "+(showQuakes?"ON":"OFF");
+
+ if(quakeLayer){
+  showQuakes?mapObj.addLayer(quakeLayer):mapObj.removeLayer(quakeLayer);
+ }
+
+ drawQuakes();
+});
+
+$("toggleMapNews").addEventListener("click",e=>{
+ showNews=!showNews;
+ e.currentTarget.textContent="Articles géolocalisés : "+(showNews?"ON":"OFF");
+
+ if(newsLayer){
+  showNews?mapObj.addLayer(newsLayer):mapObj.removeLayer(newsLayer);
+ }
+
+ renderMarkers();
+});
+
+function clock(){
+ const d=new Date();
+ $("clock").textContent=d.toLocaleTimeString("fr-FR",{timeZone:"UTC"})+" UTC";
+}
+
+renderSources();
+renderSearches();
+initMap();
+clock();
+
+setInterval(clock,1000);
+loadNews();
+loadQuakes();
+
+setInterval(loadNews,10*60*1000);
+setInterval(loadQuakes,5*60*1000);
+
+</script>
+</body>
+</html>
