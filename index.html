@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WORLD RADAR | Global Crisis Intelligence</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <style>
     * { box-sizing: border-box; }
@@ -68,9 +69,7 @@
       margin-bottom: 9px;
     }
 
-    .stat strong {
-      font-size: 25px;
-    }
+    .stat strong { font-size: 25px; }
 
     .panel {
       background: #111d30;
@@ -125,9 +124,7 @@
       font-size: 13px;
     }
 
-    .event strong {
-      color: #62c7ef;
-    }
+    .event strong { color: #62c7ef; }
 
     .muted {
       color: #91a4bd;
@@ -156,7 +153,10 @@
 </header>
 
 <main>
-  <div class="status" id="status">● Connexion aux données USGS...</div>
+
+  <div class="status" id="status">
+    ● Connexion aux sources de données...
+  </div>
 
   <section class="stats">
     <div class="stat">
@@ -170,34 +170,42 @@
     </div>
 
     <div class="stat">
+      <small>VOLCANS RÉPERTORIÉS</small>
+      <strong id="volcanoTotal">—</strong>
+    </div>
+
+    <div class="stat">
       <small>DERNIÈRE ACTUALISATION</small>
       <strong id="updated" style="font-size:17px">—</strong>
     </div>
   </section>
 
   <section class="panel">
-    <h2>CARTE SISMIQUE MONDIALE</h2>
+    <h2>CARTE MONDIALE DES ÉVÉNEMENTS</h2>
 
     <div class="filters">
-      <button class="active" data-filter="all">Tous</button>
+      <button class="active" data-filter="all">Tous les séismes</button>
       <button data-filter="4">Magnitude 4+</button>
       <button data-filter="5">Magnitude 5+</button>
       <button id="volcanoToggle" class="active">🌋 Volcans</button>
-      </div>
+    </div>
 
     <div id="map"></div>
   </section>
 
   <section class="panel">
-    <h2>DERNIERS ÉVÉNEMENTS SISMIQUES</h2>
+    <h2>DERNIERS SÉISMES</h2>
     <div id="events">
       <p class="muted">Chargement des événements...</p>
     </div>
   </section>
+
 </main>
 
 <footer>
   Sources : USGS Earthquake Hazards Program ·
+  Smithsonian Global Volcanism Program
+  <br>
   Carte : © OpenStreetMap contributors
   <br><br>
   WORLD RADAR — Prototype de surveillance mondiale
@@ -206,8 +214,15 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  const FEED =
+  // SOURCES DE DONNÉES
+
+  const EARTHQUAKE_URL =
     "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+
+  const VOLCANO_URL =
+    "https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GVP-VOTW%3ASmithsonian_VOTW_Holocene_Volcanoes&maxFeatures=5000&outputFormat=application%2Fjson";
+
+  // INITIALISATION DE LA CARTE
 
   const map = L.map("map").setView([20, 0], 2);
 
@@ -216,13 +231,17 @@
     maxZoom: 18
   }).addTo(map);
 
+  // VARIABLES
+
   let earthquakes = [];
-  let markers = [];
+  let earthquakeMarkers = [];
   let currentFilter = "all";
-  let volcanoLayer = L.layerGroup().addTo(map);
+
+  const volcanoLayer = L.layerGroup().addTo(map);
   let volcanoesVisible = true;
-  let volcanoesLoaded = false;
-  
+
+  // COULEURS DES SÉISMES
+
   function colorForMagnitude(mag) {
     if (mag >= 6) return "#ff3b3b";
     if (mag >= 5) return "#ff8c42";
@@ -230,7 +249,9 @@
     return "#42bfe8";
   }
 
-  function createPopup(feature) {
+  // POPUP DES SÉISMES
+
+  function createEarthquakePopup(feature) {
     const p = feature.properties;
     const coords = feature.geometry.coordinates;
 
@@ -238,17 +259,16 @@
 
     const title = document.createElement("strong");
     title.textContent = p.title || "Séisme détecté";
-    content.appendChild(title);
 
     const details = document.createElement("p");
     details.textContent =
       "Magnitude : " + (p.mag ?? "Inconnue") +
       " | Profondeur : " + coords[2] + " km";
-    content.appendChild(details);
 
     const date = document.createElement("p");
     date.textContent = new Date(p.time).toLocaleString("fr-FR");
-    content.appendChild(date);
+
+    content.append(title, details, date);
 
     if (p.url) {
       const link = document.createElement("a");
@@ -262,19 +282,28 @@
     return content;
   }
 
+  // AFFICHAGE DES SÉISMES
+
   function displayEarthquakes() {
-    markers.forEach(marker => map.removeLayer(marker));
-    markers = [];
+    earthquakeMarkers.forEach(marker => {
+      map.removeLayer(marker);
+    });
+
+    earthquakeMarkers = [];
 
     const filtered = earthquakes.filter(feature => {
       const mag = feature.properties.mag;
 
       if (currentFilter === "4") return mag >= 4;
       if (currentFilter === "5") return mag >= 5;
+
       return true;
     });
 
     filtered.forEach(feature => {
+      if (!feature.geometry ||
+          !Array.isArray(feature.geometry.coordinates)) return;
+
       const coords = feature.geometry.coordinates;
       const mag = feature.properties.mag;
 
@@ -292,16 +321,19 @@
         }
       );
 
-      marker.bindPopup(createPopup(feature));
+      marker.bindPopup(createEarthquakePopup(feature));
       marker.addTo(map);
-      markers.push(marker);
+      earthquakeMarkers.push(marker);
     });
+
+    // LISTE DES ÉVÉNEMENTS
 
     const events = document.getElementById("events");
     events.replaceChildren();
 
     filtered.slice(0, 15).forEach(feature => {
       const p = feature.properties;
+
       const item = document.createElement("div");
       item.className = "event";
 
@@ -323,98 +355,23 @@
       events.textContent = "Aucun événement pour ce filtre.";
     }
   }
-  
-async function loadVolcanoes() {
-  const url =
-    "https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GVP-VOTW%3ASmithsonian_VOTW_Holocene_Volcanoes&maxFeatures=5000&outputFormat=application%2Fjson";
 
-  try {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("Erreur Smithsonian : " + response.status);
-    }
-
-    const data = await response.json();
-
-    if (!Array.isArray(data.features)) {
-      throw new Error("Format de données inattendu");
-    }
-
-    volcanoLayer.clearLayers();
-
-    data.features.forEach(feature => {
-      if (!feature.geometry ||
-          !feature.geometry.coordinates) return;
-
-      const coords = feature.geometry.coordinates;
-      const longitude = coords[0];
-      const latitude = coords[1];
-
-      if (!Number.isFinite(latitude) ||
-          !Number.isFinite(longitude)) return;
-
-      const properties = feature.properties || {};
-
-      const name =
-        properties.Volcano_Name ||
-        properties.volcano_name ||
-        properties.Name ||
-        "Volcan sans nom";
-
-      const country =
-        properties.Country ||
-        properties.country ||
-        "Pays non renseigné";
-
-      const marker = L.marker(
-        [latitude, longitude],
-        {
-          icon: L.divIcon({
-            className: "",
-            html: "🌋",
-            iconSize: [25, 25],
-            iconAnchor: [12, 12]
-          })
-        }
-      );
-
-      const popup = document.createElement("div");
-      const title = document.createElement("strong");
-      title.textContent = name;
-
-      const location = document.createElement("p");
-      location.textContent = country;
-
-      popup.append(title, location);
-      marker.bindPopup(popup);
-
-      volcanoLayer.addLayer(marker);
-    });
-
-    volcanoesLoaded = true;
-
-    console.log("Volcans chargés :", data.features.length);
-
-  } catch (error) {
-    console.error("Erreur de chargement des volcans :", error);
-  }
-}
+  // CHARGEMENT DES SÉISMES USGS
 
   async function loadEarthquakes() {
     const status = document.getElementById("status");
 
     try {
-      const response = await fetch(FEED);
+      const response = await fetch(EARTHQUAKE_URL);
 
       if (!response.ok) {
-        throw new Error("Réponse USGS : " + response.status);
+        throw new Error("Erreur USGS : " + response.status);
       }
 
       const data = await response.json();
 
       if (!Array.isArray(data.features)) {
-        throw new Error("Format de données inattendu");
+        throw new Error("Format USGS inattendu");
       }
 
       earthquakes = data.features;
@@ -427,7 +384,9 @@ async function loadVolcanoes() {
         .filter(Number.isFinite);
 
       document.getElementById("maximum").textContent =
-        magnitudes.length ? Math.max(...magnitudes).toFixed(1) : "—";
+        magnitudes.length
+          ? Math.max(...magnitudes).toFixed(1)
+          : "—";
 
       document.getElementById("updated").textContent =
         new Date().toLocaleTimeString("fr-FR", {
@@ -435,49 +394,178 @@ async function loadVolcanoes() {
           minute: "2-digit"
         });
 
-      status.textContent =
-        "● Données USGS connectées — actualisation automatique";
-      status.style.color = "#61d9a0";
-
       displayEarthquakes();
 
-    } catch (error) {
       status.textContent =
-        "● Impossible de récupérer les données USGS. Nouvelle tentative prévue.";
+        "● Données sismiques USGS actualisées";
+      status.style.color = "#61d9a0";
+
+    } catch (error) {
+      console.error("Erreur séismes :", error);
+
+      status.textContent =
+        "● Erreur de connexion aux données sismiques";
       status.style.color = "#ff8c42";
-      console.error(error);
     }
   }
 
+  // RECHERCHE D'UNE INFORMATION DANS LES PROPRIÉTÉS VOLCANIQUES
+
+  function findProperty(properties, pattern) {
+    const key = Object.keys(properties).find(key =>
+      pattern.test(key)
+    );
+
+    return key ? properties[key] : null;
+  }
+
+  // EXTRACTION DES COORDONNÉES VOLCANIQUES
+
+  function getVolcanoCoordinates(geometry) {
+    if (!geometry || !geometry.coordinates) return null;
+
+    let coordinates = geometry.coordinates;
+
+    if (geometry.type === "MultiPoint") {
+      coordinates = coordinates[0];
+    }
+
+    if (!Array.isArray(coordinates) ||
+        coordinates.length < 2) return null;
+
+    const longitude = Number(coordinates[0]);
+    const latitude = Number(coordinates[1]);
+
+    if (!Number.isFinite(longitude) ||
+        !Number.isFinite(latitude)) return null;
+
+    return [latitude, longitude];
+  }
+
+  // CHARGEMENT DES VOLCANS SMITHSONIAN
+
+  async function loadVolcanoes() {
+    const toggle = document.getElementById("volcanoToggle");
+
+    try {
+      const response = await fetch(VOLCANO_URL);
+
+      if (!response.ok) {
+        throw new Error("Erreur Smithsonian : " + response.status);
+      }
+
+      const data = await response.json();
+
+      if (!Array.isArray(data.features)) {
+        throw new Error("Format volcanique inattendu");
+      }
+
+      volcanoLayer.clearLayers();
+
+      let count = 0;
+
+      data.features.forEach(feature => {
+        const coordinates =
+          getVolcanoCoordinates(feature.geometry);
+
+        if (!coordinates) return;
+
+        const properties = feature.properties || {};
+
+        const name =
+          findProperty(properties, /volcano.?name|^name$/i) ||
+          "Volcan sans nom";
+
+        const country =
+          findProperty(properties, /^country$/i) ||
+          "Pays non renseigné";
+
+        const marker = L.marker(coordinates, {
+          icon: L.divIcon({
+            className: "",
+            html: "🌋",
+            iconSize: [25, 25],
+            iconAnchor: [12, 12]
+          })
+        });
+
+        const popup = document.createElement("div");
+
+        const title = document.createElement("strong");
+        title.textContent = name;
+
+        const location = document.createElement("p");
+        location.textContent = country;
+
+        const source = document.createElement("small");
+        source.textContent = "Source : Smithsonian GVP";
+
+        popup.append(title, location, source);
+
+        marker.bindPopup(popup);
+        volcanoLayer.addLayer(marker);
+
+        count++;
+      });
+
+      document.getElementById("volcanoTotal").textContent = count;
+
+      if (!volcanoesVisible) {
+        map.removeLayer(volcanoLayer);
+      }
+
+      toggle.disabled = false;
+
+      console.log("Volcans chargés :", count);
+
+    } catch (error) {
+      console.error("Erreur volcans :", error);
+
+      document.getElementById("volcanoTotal").textContent = "Erreur";
+      toggle.disabled = true;
+      toggle.textContent = "🌋 Volcans indisponibles";
+    }
+  }
+
+  // FILTRES DES SÉISMES
+
   document.querySelectorAll("[data-filter]").forEach(button => {
     button.addEventListener("click", () => {
-      document.querySelectorAll("[data-filter]")
-        .forEach(b => b.classList.remove("active"));
+      document.querySelectorAll("[data-filter]").forEach(b => {
+        b.classList.remove("active");
+      });
 
       button.classList.add("active");
       currentFilter = button.dataset.filter;
+
       displayEarthquakes();
     });
   });
 
-  
-document.getElementById("volcanoToggle")
-  .addEventListener("click", function() {
-    volcanoesVisible = !volcanoesVisible;
+  // BOUTON INDÉPENDANT DES VOLCANS
 
-    if (volcanoesVisible) {
-      map.addLayer(volcanoLayer);
-      this.classList.add("active");
-    } else {
-      map.removeLayer(volcanoLayer);
-      this.classList.remove("active");
-    }
-  });
+  document.getElementById("volcanoToggle")
+    .addEventListener("click", function() {
 
-loadEarthquakes();
-loadVolcanoes();
+      volcanoesVisible = !volcanoesVisible;
 
-setInterval(loadEarthquakes, 5 * 60 * 1000);
+      if (volcanoesVisible) {
+        map.addLayer(volcanoLayer);
+        this.classList.add("active");
+      } else {
+        map.removeLayer(volcanoLayer);
+        this.classList.remove("active");
+      }
+    });
+
+  // DÉMARRAGE
+
+  loadEarthquakes();
+  loadVolcanoes();
+
+  // ACTUALISATION DES SÉISMES TOUTES LES 5 MINUTES
+
+  setInterval(loadEarthquakes, 5 * 60 * 1000);
 
 </script>
 
