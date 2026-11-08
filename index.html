@@ -3,479 +3,282 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#101923">
-<title>WORLD RADAR — Surveillance internationale</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111b25">
+<title>WORLD RADAR | Veille internationale</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-:root {
+:root{
   --bg:#101923;
   --panel:#17232e;
-  --panel2:#1c2a36;
-  --line:#30404d;
+  --panel2:#1d2b37;
+  --line:#30414f;
   --text:#e7edf1;
-  --muted:#9baab5;
-  --blue:#7ca6c5;
-  --green:#83ad99;
-  --orange:#d2a46d;
+  --muted:#91a1ad;
+  --blue:#79a9ca;
   --red:#c97878;
+  --orange:#d0a36d;
+  --yellow:#c9bd78;
+  --green:#82ad98;
+  --purple:#a18bc3;
 }
-
-* { box-sizing:border-box; }
-
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
-  font-size:14px;
-}
-
-header {
-  padding:22px 28px;
-  border-bottom:1px solid var(--line);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-  flex-wrap:wrap;
-  background:#121d27;
-}
-
-.brand h1 {
-  margin:0;
-  font-family:Georgia,serif;
-  font-size:27px;
-  font-weight:normal;
-  letter-spacing:2px;
-}
-
-.brand p {
-  margin:6px 0 0;
-  color:var(--muted);
-  font-size:11px;
-  letter-spacing:1.5px;
-  text-transform:uppercase;
-}
-
-.header-right {
-  display:flex;
-  align-items:center;
-  gap:18px;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.live-dot {
-  display:inline-block;
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:var(--green);
-  margin-right:7px;
-}
-
-main {
-  max-width:1600px;
-  margin:auto;
-  padding:22px;
-}
-
-.section-heading {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  margin:0 0 13px;
-}
-
-.section-heading h2 {
-  font-family:Georgia,serif;
-  font-size:18px;
-  font-weight:normal;
-  margin:0;
-}
-
-.section-heading span {
-  color:var(--muted);
-  font-size:11px;
-}
-
-.stats {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-  margin-bottom:20px;
-}
-
-.stat {
-  background:var(--panel);
-  border:1px solid var(--line);
-  padding:15px 17px;
-  min-height:90px;
-}
-
-.stat-label {
-  color:var(--muted);
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-.stat-value {
-  font-family:Georgia,serif;
-  font-size:27px;
-  margin-top:10px;
-}
-
-.stat-detail {
-  color:var(--muted);
-  font-size:11px;
-  margin-top:4px;
-}
-
-.layout {
-  display:grid;
-  grid-template-columns:minmax(0,1.65fr) minmax(300px,0.85fr);
-  gap:16px;
-  margin-bottom:18px;
-}
-
-.panel {
-  background:var(--panel);
-  border:1px solid var(--line);
-  min-width:0;
-}
-
-.panel-header {
-  padding:15px 17px;
-  border-bottom:1px solid var(--line);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-}
-
-.panel-header h2 {
-  font-family:Georgia,serif;
-  font-size:17px;
-  font-weight:normal;
-  margin:0;
-}
-
-.panel-body { padding:15px 17px; }
-
-#map {
-  width:100%;
-  height:440px;
-  background:#17232e;
-}
-
-.map-legend {
-  display:flex;
-  gap:16px;
-  flex-wrap:wrap;
-  padding:11px 16px;
-  color:var(--muted);
-  font-size:11px;
-  border-top:1px solid var(--line);
-}
-
-.legend-dot {
-  display:inline-block;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  margin-right:5px;
-}
-
-.alert-list,.news-list,.history-list {
-  display:flex;
-  flex-direction:column;
-}
-
-.alert-item,.news-item,.history-item {
-  padding:13px 0;
-  border-bottom:1px solid var(--line);
-}
-
-.alert-item:last-child,.news-item:last-child,.history-item:last-child {
-  border-bottom:0;
-}
-
-.alert-top,.news-top {
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:center;
-  margin-bottom:6px;
-}
-
-.tag {
-  display:inline-block;
-  padding:3px 7px;
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.6px;
-  border:1px solid var(--line);
-  color:var(--muted);
-}
-
-.tag.red { color:var(--red); border-color:#704747; }
-.tag.orange { color:var(--orange); border-color:#705d43; }
-.tag.green { color:var(--green); border-color:#466354; }
-.tag.blue { color:var(--blue); border-color:#435d70; }
-
-.item-title {
-  font-size:13px;
-  line-height:1.5;
-  color:var(--text);
-}
-
-.item-meta {
-  color:var(--muted);
-  font-size:11px;
-  margin-top:6px;
-  line-height:1.5;
-}
-
-.news-item a {
-  color:var(--text);
-  text-decoration:none;
-}
-
-.news-item a:hover { color:var(--blue); }
-
-.news-filters {
-  display:flex;
-  gap:7px;
-  flex-wrap:wrap;
-}
-
-select,button {
-  background:var(--panel2);
-  color:var(--text);
-  border:1px solid var(--line);
-  padding:8px 10px;
-  font-size:12px;
-  border-radius:2px;
-}
-
-button { cursor:pointer; }
-button:hover { border-color:var(--blue); }
-
-.economic-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.economic-card {
-  border:1px solid var(--line);
-  padding:13px;
-  background:var(--panel2);
-}
-
-.economic-name {
-  color:var(--muted);
-  font-size:11px;
-  margin-bottom:9px;
-}
-
-.economic-value {
-  font-family:Georgia,serif;
-  font-size:22px;
-}
-
-.economic-detail {
-  color:var(--muted);
-  font-size:10px;
-  margin-top:6px;
-  line-height:1.4;
-}
-
-.two-columns {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-  margin-bottom:18px;
-}
-
-.status {
-  color:var(--muted);
-  font-size:11px;
-}
-
-.empty {
-  color:var(--muted);
-  font-size:12px;
-  padding:17px 0;
-  line-height:1.6;
-}
-
-footer {
-  border-top:1px solid var(--line);
-  padding:18px 25px;
-  color:var(--muted);
-  font-size:11px;
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap;
-}
-
-footer a { color:var(--blue); }
-
-.leaflet-container { background:#17232e; }
-.leaflet-popup-content-wrapper,.leaflet-popup-tip {
-  background:#17232e;
-  color:var(--text);
-}
-.leaflet-popup-content { font-size:12px; }
-
-@media(max-width:900px) {
-  .layout { grid-template-columns:1fr; }
-  .two-columns { grid-template-columns:1fr; }
-}
-
-@media(max-width:600px) {
-  header { padding:18px; }
-  main { padding:13px; }
-  .stats { grid-template-columns:repeat(2,1fr); }
-  .economic-grid { grid-template-columns:1fr; }
-  #map { height:340px; }
-  .brand h1 { font-size:23px; }
-}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;font-size:14px}
+header{background:#121d27;border-bottom:1px solid var(--line);padding:22px 26px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.brand h1{font:normal 29px Georgia,serif;letter-spacing:3px;margin:0}
+.brand p{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin:7px 0 0}
+.header-right{display:flex;gap:17px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.live{width:7px;height:7px;background:var(--green);border-radius:50%;display:inline-block;margin-right:7px}
+main{max-width:1700px;margin:auto;padding:22px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+h2{font:normal 19px Georgia,serif;margin:0}
+h3{font:normal 16px Georgia,serif;margin:0}
+.small{font-size:11px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);padding:14px 16px;min-height:88px}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.stat-value{font:normal 27px Georgia,serif;margin-top:9px}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:4px}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.85fr);gap:15px;margin-bottom:16px}
+.panel{background:var(--panel);border:1px solid var(--line);min-width:0;margin-bottom:16px}
+.panel-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.panel-body{padding:15px 16px}
+#map{height:440px;width:100%;background:#17232e}
+.map-legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 15px;border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab,button,select,input{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 10px;font-size:11px;border-radius:2px}
+.tab,button{cursor:pointer}
+.tab.active{background:#2b4050;border-color:var(--blue);color:#fff}
+button:hover,.tab:hover{border-color:var(--blue)}
+select{max-width:100%}
+.feed{display:flex;flex-direction:column}
+.article{padding:13px 0;border-bottom:1px solid var(--line)}
+.article:last-child{border-bottom:0}
+.article-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.article-title{font-size:13px;line-height:1.5}
+.article-title a{color:var(--text);text-decoration:none}
+.article-title a:hover{color:var(--blue)}
+.meta{font-size:10px;color:var(--muted);line-height:1.6;margin-top:6px}
+.tag{display:inline-block;padding:3px 7px;border:1px solid var(--line);font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.tag.red{color:var(--red);border-color:#704747}
+.tag.orange{color:var(--orange);border-color:#705b40}
+.tag.yellow{color:var(--yellow);border-color:#706b43}
+.tag.blue{color:var(--blue);border-color:#435e72}
+.tag.green{color:var(--green);border-color:#466354}
+.tag.purple{color:var(--purple);border-color:#594a70}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.econ-card{background:var(--panel2);border:1px solid var(--line);padding:13px}
+.econ-name{font-size:10px;color:var(--muted);margin-bottom:8px}
+.econ-value{font:normal 22px Georgia,serif}
+.econ-detail{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.5}
+.alert-list,.history-list{display:flex;flex-direction:column}
+.alert-item,.history-item{padding:12px 0;border-bottom:1px solid var(--line)}
+.alert-item:last-child,.history-item:last-child{border-bottom:0}
+.alert-title{font-size:12px;line-height:1.5;margin-top:6px}
+.empty{font-size:12px;color:var(--muted);line-height:1.6;padding:15px 0}
+.notice{padding:11px 13px;background:#1b2a35;border-left:2px solid var(--orange);color:var(--muted);font-size:11px;line-height:1.6;margin-bottom:15px}
+.zone-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.zone{padding:10px;background:var(--panel2);border:1px solid var(--line);font-size:11px;line-height:1.5}
+.zone strong{display:block;color:var(--text);font-weight:normal;margin-bottom:3px}
+footer{border-top:1px solid var(--line);padding:18px 24px;color:var(--muted);font-size:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+footer a{color:var(--blue)}
+.leaflet-container{background:#17232e}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#17232e;color:var(--text)}
+.leaflet-popup-content{font-size:11px;line-height:1.5}
+a{color:var(--blue)}
+@media(max-width:950px){.grid-main{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){main{padding:12px}.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.three{grid-template-columns:1fr}.zone-list{grid-template-columns:1fr}#map{height:350px}.brand h1{font-size:24px}}
 </style>
 </head>
 
 <body>
-
 <header>
   <div class="brand">
     <h1>WORLD RADAR</h1>
-    <p>Surveillance internationale & analyse des événements</p>
+    <p>Veille géopolitique · Sécurité · Économie · Monde</p>
   </div>
   <div class="header-right">
-    <span><span class="live-dot"></span>Flux de données actifs</span>
+    <span><i class="live"></i>Surveillance des flux</span>
     <span id="clock">--:--:--</span>
+    <span id="connection">Initialisation…</span>
   </div>
 </header>
 
 <main>
 
-  <div class="section-heading">
-    <h2>Vue d'ensemble</h2>
-    <span id="lastUpdate">Initialisation des données…</span>
+  <div class="topline">
+    <h2>Situation internationale</h2>
+    <span class="small" id="lastUpdate">En attente des données</span>
   </div>
 
   <section class="stats">
     <div class="stat">
-      <div class="stat-label">Séismes détectés</div>
-      <div class="stat-value" id="statQuakes">—</div>
-      <div class="stat-detail">Sur les dernières 24 heures</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Actualités collectées</div>
+      <div class="stat-label">Articles collectés</div>
       <div class="stat-value" id="statNews">—</div>
-      <div class="stat-detail">Articles internationaux</div>
+      <div class="stat-sub">Actualités internationales</div>
     </div>
     <div class="stat">
       <div class="stat-label">Alertes générées</div>
       <div class="stat-value" id="statAlerts">—</div>
-      <div class="stat-detail">À partir des flux disponibles</div>
+      <div class="stat-sub">Signaux automatiques</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Dernière actualisation</div>
-      <div class="stat-value" id="statTime">—</div>
-      <div class="stat-detail">Actualisation automatique</div>
+      <div class="stat-label">Séismes 24 h</div>
+      <div class="stat-value" id="statQuakes">—</div>
+      <div class="stat-sub">Source USGS</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Articles sécurité</div>
+      <div class="stat-value" id="statSecurity">—</div>
+      <div class="stat-sub">Conflits et défense</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Articles économie</div>
+      <div class="stat-value" id="statEconomy">—</div>
+      <div class="stat-sub">Énergie, commerce, marchés</div>
     </div>
   </section>
 
-  <section class="layout">
-    <div class="panel">
-      <div class="panel-header">
+  <div class="grid-main">
+    <section class="panel">
+      <div class="panel-head">
         <h2>Cartographie mondiale</h2>
-        <span class="status" id="mapStatus">Chargement…</span>
+        <span class="small" id="mapStatus">Chargement…</span>
       </div>
       <div id="map"></div>
       <div class="map-legend">
-        <span><i class="legend-dot" style="background:#83ad99"></i>Séisme inférieur à 4</span>
-        <span><i class="legend-dot" style="background:#d2a46d"></i>Séisme de 4 à 5,9</span>
-        <span><i class="legend-dot" style="background:#c97878"></i>Séisme de 6 et plus</span>
+        <span><i class="dot" style="background:#c97878"></i>Séisme majeur</span>
+        <span><i class="dot" style="background:#d0a36d"></i>Séisme significatif</span>
+        <span><i class="dot" style="background:#82ad98"></i>Autre séisme</span>
+        <span><i class="dot" style="background:#a18bc3"></i>Zone géographique de veille</span>
       </div>
-    </div>
+    </section>
 
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Centre de surveillance</h2>
-        <span class="status" id="alertStatus">En attente</span>
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Centre d'alertes</h2>
+        <span class="small" id="alertStatus">En attente</span>
       </div>
       <div class="panel-body">
+        <div class="notice">
+          Les niveaux sont attribués automatiquement à partir de mots-clés. Ils ne représentent pas une évaluation officielle du risque.
+        </div>
         <div class="alert-list" id="alerts">
-          <div class="empty">Les alertes apparaîtront ici lorsque les données seront chargées.</div>
+          <div class="empty">Les signalements apparaîtront ici après réception des flux.</div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
-  <section class="panel" style="margin-bottom:18px">
-    <div class="panel-header">
-      <h2>Actualités internationales</h2>
-      <div class="news-filters">
-        <select id="newsFilter">
-          <option value="all">Tous les sujets</option>
-          <option value="conflit">Conflits et sécurité</option>
-          <option value="politique">Politique et diplomatie</option>
-          <option value="economie">Économie et énergie</option>
-          <option value="catastrophe">Catastrophes</option>
-        </select>
-        <button id="refreshNews">Actualiser</button>
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Veille géopolitique et internationale</h2>
+      <div class="tabs" id="categoryTabs">
+        <button class="tab active" data-filter="all">Tout</button>
+        <button class="tab" data-filter="conflit">Conflits</button>
+        <button class="tab" data-filter="diplomatie">Diplomatie</button>
+        <button class="tab" data-filter="politique">Politique</button>
+        <button class="tab" data-filter="securite">Sécurité</button>
+        <button class="tab" data-filter="sanctions">Sanctions</button>
+        <button class="tab" data-filter="economie">Économie</button>
+        <button class="tab" data-filter="energie">Énergie</button>
+        <button class="tab" data-filter="maritime">Maritime</button>
+        <button class="tab" data-filter="humanitaire">Humanitaire</button>
       </div>
     </div>
     <div class="panel-body">
-      <div class="status" id="newsStatus">Connexion aux sources d'actualités…</div>
-      <div class="news-list" id="news">
-        <div class="empty">Chargement des actualités internationales…</div>
+      <div class="topline">
+        <span class="small" id="newsStatus">Connexion aux sources…</span>
+        <button id="refreshNews">Actualiser les actualités</button>
+      </div>
+      <div class="feed" id="news">
+        <div class="empty">Chargement du flux international…</div>
       </div>
     </div>
   </section>
 
-  <section class="panel" style="margin-bottom:18px">
-    <div class="panel-header">
-      <h2>Indicateurs économiques</h2>
-      <span class="status" id="economicStatus">Chargement…</span>
-    </div>
-    <div class="panel-body">
-      <div class="economic-grid" id="economic">
-        <div class="empty">Récupération des indicateurs…</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="two-columns">
-    <div class="panel">
-      <div class="panel-header">
-        <h2>Activité sismique</h2>
-        <span class="status" id="quakeStatus">Chargement…</span>
+  <div class="two">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Zones géographiques de veille</h2>
+        <span class="small">Repères de référence</span>
       </div>
       <div class="panel-body">
-        <div class="history-list" id="quakes">
+        <div class="notice">
+          Ces repères indiquent des zones suivies par le tableau de bord. Ils ne signalent pas une attaque ou un événement en cours. Les actualités associées doivent être consultées séparément.
+        </div>
+        <div class="zone-list" id="zones"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Indicateurs économiques</h2>
+        <span class="small" id="economicStatus">Chargement…</span>
+      </div>
+      <div class="panel-body">
+        <div class="three" id="economic">
+          <div class="empty">Récupération des données…</div>
+        </div>
+        <div class="meta" style="margin-top:12px">
+          Les taux de change sont des données de référence. Les matières premières et le transport maritime sont suivis ici par les actualités, pas par des cotations de marché en direct.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="two">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Activité sismique</h2>
+        <span class="small" id="quakeStatus">Chargement…</span>
+      </div>
+      <div class="panel-body">
+        <div class="tabs" style="margin-bottom:12px">
+          <button class="tab active" data-quake="day">24 heures</button>
+          <button class="tab" data-quake="week">7 jours</button>
+        </div>
+        <div class="feed" id="quakes">
           <div class="empty">Récupération des données USGS…</div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="panel">
-      <div class="panel-header">
+    <section class="panel">
+      <div class="panel-head">
         <h2>Historique des événements</h2>
-        <button id="clearHistory">Effacer</button>
+        <button id="clearHistory">Effacer l'historique</button>
       </div>
       <div class="panel-body">
-        <div class="history-list" id="history">
-          <div class="empty">Aucun événement enregistré pour le moment.</div>
+        <div class="feed" id="history">
+          <div class="empty">Aucun événement enregistré.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Sources et méthodologie</h2>
+      <span class="small">Transparence des données</span>
+    </div>
+    <div class="panel-body">
+      <div class="three">
+        <div class="econ-card">
+          <div class="econ-name">Actualités internationales</div>
+          <div class="econ-detail">GDELT Project, avec flux RSS Google Actualités en secours. Les articles sont classés automatiquement par mots-clés.</div>
+        </div>
+        <div class="econ-card">
+          <div class="econ-name">Données sismiques</div>
+          <div class="econ-detail">US Geological Survey (USGS). Les données affichées proviennent du flux public des dernières 24 heures et des 7 derniers jours.</div>
+        </div>
+        <div class="econ-card">
+          <div class="econ-name">Données monétaires</div>
+          <div class="econ-detail">Frankfurter API. Taux de change de référence, avec date de publication de la série.</div>
         </div>
       </div>
     </div>
@@ -484,12 +287,12 @@ footer a { color:var(--blue); }
 </main>
 
 <footer>
-  <span>WORLD RADAR — Tableau de bord indépendant de veille internationale.</span>
+  <span>WORLD RADAR · Tableau de veille indépendant</span>
   <span>
-    Sources :
-    <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> ·
     <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">GDELT</a> ·
-    <a href="https://www.frankfurter.app/" target="_blank" rel="noopener">Frankfurter</a>
+    <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> ·
+    <a href="https://www.frankfurter.app/" target="_blank" rel="noopener">Frankfurter</a> ·
+    <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>
   </span>
 </footer>
 
@@ -499,585 +302,146 @@ footer a { color:var(--blue); }
 (() => {
 "use strict";
 
-/* -------------------------------------------------------
-   CONFIGURATION
-------------------------------------------------------- */
+/* =====================================================
+   CONFIGURATION GENERALE
+===================================================== */
 
 const CONFIG = {
-  refreshInterval: 5 * 60 * 1000,
-  maxNews: 35,
-  maxQuakes: 100,
-  historyLimit: 40
+  refresh: 5 * 60 * 1000,
+  maxArticles: 100,
+  historyLimit: 60
 };
 
 const $ = id => document.getElementById(id);
 
 const state = {
-  quakes: [],
-  news: [],
+  articles: [],
+  quakesDay: [],
+  quakesWeek: [],
   alerts: [],
   history: [],
   map: null,
   quakeLayer: null,
-  newsSource: "Aucune source"
+  zoneLayer: null,
+  articleFilter: "all",
+  quakePeriod: "day",
+  source: "Aucune"
 };
 
-/* -------------------------------------------------------
+/* =====================================================
+   ZONES DE VEILLE
+   Repères géographiques indicatifs, pas des événements.
+===================================================== */
+
+const zones = [
+  {name:"Europe orientale",detail:"Ukraine · Russie · mer Noire",lat:48.5,lon:34.5,color:"#a18bc3"},
+  {name:"Moyen-Orient",detail:"Levant · Israël · Palestine",lat:31.8,lon:35.1,color:"#a18bc3"},
+  {name:"Golfe et détroit d'Ormuz",detail:"Énergie · circulation maritime",lat:26.5,lon:56.5,color:"#a18bc3"},
+  {name:"Mer Rouge",detail:"Bab el-Mandeb · routes commerciales",lat:13.2,lon:43.3,color:"#a18bc3"},
+  {name:"Indo-Pacifique",detail:"Détroit de Taïwan · mer de Chine",lat:23.5,lon:119.5,color:"#a18bc3"},
+  {name:"Sahel",detail:"Afrique de l'Ouest et sécurité régionale",lat:15.5,lon:0.5,color:"#a18bc3"},
+  {name:"Corne de l'Afrique",detail:"Soudan · mer Rouge · Somalie",lat:10.5,lon:38.5,color:"#a18bc3"},
+  {name:"Péninsule coréenne",detail:"Asie du Nord-Est",lat:38.2,lon:127.5,color:"#a18bc3"}
+];
+
+/* =====================================================
    OUTILS
-------------------------------------------------------- */
+===================================================== */
 
 function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
-  })[char]);
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[c]);
 }
 
 function safeURL(value) {
   try {
-    const url = new URL(value);
-    return ["https:","http:"].includes(url.protocol) ? url.href : "#";
+    const u = new URL(value);
+    return ["https:","http:"].includes(u.protocol) ? u.href : "#";
   } catch {
     return "#";
   }
 }
 
-function formatDate(value) {
-  if (!value) return "Date inconnue";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Date inconnue";
-  return date.toLocaleString("fr-FR", {
-    day:"2-digit",
-    month:"2-digit",
-    year:"numeric",
-    hour:"2-digit",
-    minute:"2-digit"
+function domainOf(url) {
+  try { return new URL(url).hostname.replace(/^www\./,""); }
+  catch { return "Source externe"; }
+}
+
+function dateValue(value) {
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? Date.now() : d.getTime();
+}
+
+function dateText(value) {
+  return new Date(dateValue(value)).toLocaleString("fr-FR",{
+    day:"2-digit",month:"2-digit",year:"numeric",
+    hour:"2-digit",minute:"2-digit"
   });
 }
 
-function timeAgo(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+function ago(value) {
+  const minutes = Math.max(0,Math.floor((Date.now()-dateValue(value))/60000));
   if (minutes < 1) return "À l'instant";
   if (minutes < 60) return `Il y a ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `Il y a ${hours} h`;
-  return `Il y a ${Math.floor(hours / 24)} j`;
+  if (minutes < 1440) return `Il y a ${Math.floor(minutes/60)} h`;
+  return `Il y a ${Math.floor(minutes/1440)} j`;
 }
 
-async function getJSON(url, timeout = 15000) {
+async function fetchJSON(url,timeout=18000) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
-
+  const timer = setTimeout(()=>controller.abort(),timeout);
   try {
-    const response = await fetch(url, {
-      signal:controller.signal,
-      cache:"no-store"
-    });
-    if (!response.ok) throw new Error("Erreur HTTP " + response.status);
+    const response = await fetch(url,{signal:controller.signal,cache:"no-store"});
+    if (!response.ok) throw new Error("HTTP "+response.status);
     return await response.json();
   } finally {
     clearTimeout(timer);
   }
 }
 
-/* -------------------------------------------------------
+function setText(id,value) {
+  $(id).textContent = value;
+}
+
+/* =====================================================
    HORLOGE
-------------------------------------------------------- */
+===================================================== */
 
-function updateClock() {
-  $("clock").textContent = new Date().toLocaleString("fr-FR", {
-    dateStyle:"short",
-    timeStyle:"medium"
-  });
+function clock() {
+  setText("clock",new Date().toLocaleString("fr-FR",{
+    dateStyle:"short",timeStyle:"medium"
+  }));
 }
-updateClock();
-setInterval(updateClock, 1000);
+clock();
+setInterval(clock,1000);
 
-/* -------------------------------------------------------
-   CARTE
-------------------------------------------------------- */
-
-function initMap() {
-  if (typeof L === "undefined") {
-    $("mapStatus").textContent = "Carte indisponible";
-    return;
-  }
-
-  state.map = L.map("map", {
-    worldCopyJump:true
-  }).setView([20, 10], 2);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom:18
-  }).addTo(state.map);
-
-  state.quakeLayer = L.layerGroup().addTo(state.map);
-  $("mapStatus").textContent = "Carte opérationnelle";
-}
-
-/* -------------------------------------------------------
-   SEISMES — USGS
-------------------------------------------------------- */
-
-async function loadEarthquakes() {
-  const url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
-
-  try {
-    const data = await getJSON(url);
-
-    state.quakes = (data.features || [])
-      .filter(item => item.geometry && item.geometry.coordinates)
-      .sort((a,b) => (b.properties.time || 0) - (a.properties.time || 0))
-      .slice(0, CONFIG.maxQuakes);
-
-    renderEarthquakes();
-    renderMap();
-    buildAlerts();
-
-    $("quakeStatus").textContent = `${state.quakes.length} événements reçus`;
-    $("statQuakes").textContent = state.quakes.length;
-    addHistory("Flux sismique actualisé", `${state.quakes.length} séismes détectés par l'USGS.`);
-  } catch (error) {
-    console.error("USGS :", error);
-    $("quakeStatus").textContent = "Flux indisponible";
-    $("mapStatus").textContent = "Données sismiques indisponibles";
-    $("quakes").innerHTML = '<div class="empty">Impossible de récupérer les données USGS pour le moment.</div>';
-  }
-}
-
-function magnitudeColor(magnitude) {
-  if (magnitude >= 6) return "#c97878";
-  if (magnitude >= 4) return "#d2a46d";
-  return "#83ad99";
-}
-
-function renderMap() {
-  if (!state.map || !state.quakeLayer) return;
-
-  state.quakeLayer.clearLayers();
-
-  state.quakes.forEach(item => {
-    const p = item.properties;
-    const coordinates = item.geometry.coordinates;
-    const magnitude = Number(p.mag || 0);
-    const radius = Math.max(4, Math.min(13, magnitude * 2));
-
-    const marker = L.circleMarker(
-      [coordinates[1], coordinates[0]],
-      {
-        radius,
-        color:magnitudeColor(magnitude),
-        fillColor:magnitudeColor(magnitude),
-        fillOpacity:.65,
-        weight:1
-      }
-    );
-
-    marker.bindPopup(`
-      <strong>${escapeHTML(p.place || "Localisation inconnue")}</strong><br>
-      Magnitude : ${magnitude.toFixed(1)}<br>
-      Profondeur : ${Number(coordinates[2]).toFixed(1)} km<br>
-      Date : ${formatDate(p.time)}
-      <br><a href="${safeURL(p.url)}" target="_blank" rel="noopener">Source USGS</a>
-    `);
-
-    marker.addTo(state.quakeLayer);
-  });
-}
-
-function renderEarthquakes() {
-  const container = $("quakes");
-
-  if (!state.quakes.length) {
-    container.innerHTML = '<div class="empty">Aucun séisme disponible dans le flux.</div>';
-    return;
-  }
-
-  container.innerHTML = state.quakes.slice(0, 12).map(item => {
-    const p = item.properties;
-    const magnitude = Number(p.mag || 0);
-    const color = magnitude >= 6 ? "red" : magnitude >= 4 ? "orange" : "green";
-
-    return `
-      <div class="history-item">
-        <div class="alert-top">
-          <span class="tag ${color}">Magnitude ${magnitude.toFixed(1)}</span>
-          <span class="status">${timeAgo(p.time)}</span>
-        </div>
-        <div class="item-title">${escapeHTML(p.place || "Localisation inconnue")}</div>
-        <div class="item-meta">
-          Profondeur : ${Number(item.geometry.coordinates[2]).toFixed(1)} km ·
-          ${formatDate(p.time)}
-          · <a href="${safeURL(p.url)}" target="_blank" rel="noopener" style="color:var(--blue)">USGS</a>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-/* -------------------------------------------------------
-   ACTUALITES — GDELT
-------------------------------------------------------- */
-
-function classifyTopic(title) {
-  const t = title.toLowerCase();
-
-  if (/séisme|earthquake|inondation|incendie|cyclone|ouragan|catastrophe|flood|wildfire|tsunami/.test(t)) {
-    return "catastrophe";
-  }
-
-  if (/guerre|conflit|attaque|armée|militaire|missile|terror|offensive|combat|war|strike/.test(t)) {
-    return "conflit";
-  }
-
-  if (/économie|inflation|énergie|pétrole|gaz|bourse|commerce|banque|économ|oil|market/.test(t)) {
-    return "economie";
-  }
-
-  return "politique";
-}
-
-function topicLabel(topic) {
-  return {
-    conflit:"Conflits et sécurité",
-    politique:"Politique et diplomatie",
-    economie:"Économie et énergie",
-    catastrophe:"Catastrophes"
-  }[topic] || "International";
-}
-
-function normalizeNews(items) {
-  const seen = new Set();
-
-  return items.map(item => {
-    const title = String(item.title || "").trim();
-    const url = safeURL(item.url || item.link || "");
-    if (!title || url === "#") return null;
-
-    const key = title.toLowerCase();
-    if (seen.has(key)) return null;
-    seen.add(key);
-
-    const date = item.date || item.seendate || item.pubDate || Date.now();
-
-    return {
-      title,
-      url,
-      date,
-      domain:item.domain || getDomain(url),
-      topic:classifyTopic(title)
-    };
-  }).filter(Boolean)
-    .sort((a,b) => new Date(b.date) - new Date(a.date))
-    .slice(0, CONFIG.maxNews);
-}
-
-function getDomain(url) {
-  try { return new URL(url).hostname.replace(/^www\./,""); }
-  catch { return "Source externe"; }
-}
-
-async function loadGDELT() {
-  const query = "(geopolitics OR diplomacy OR conflict OR international OR sanctions OR energy)";
-  const params = new URLSearchParams({
-    query,
-    mode:"ArtList",
-    format:"json",
-    maxrecords:"35",
-    sort:"DateDesc"
-  });
-
-  const data = await getJSON(
-    "https://api.gdeltproject.org/api/v2/doc/doc?" + params.toString(),
-    18000
-  );
-
-  if (!data.articles || !data.articles.length) {
-    throw new Error("Aucun article GDELT");
-  }
-
-  return normalizeNews(data.articles.map(article => ({
-    title:article.title,
-    url:article.url,
-    date:article.seendate,
-    domain:article.domain
-  })));
-}
-
-/* -------------------------------------------------------
-   ACTUALITES — SECOURS GOOGLE NEWS RSS
-------------------------------------------------------- */
-
-async function loadGoogleNews() {
-  const queries = [
-    "actualité géopolitique internationale",
-    "conflits diplomatie sécurité internationale",
-    "économie énergie pétrole international"
-  ];
-
-  const all = [];
-
-  for (const query of queries) {
-    const rssURL = "https://news.google.com/rss/search?q=" +
-      encodeURIComponent(query) + "&hl=fr&gl=FR&ceid=FR:fr";
-
-    const proxyURL = "https://api.allorigins.win/raw?url=" +
-      encodeURIComponent(rssURL);
-
-    const response = await fetch(proxyURL, {cache:"no-store"});
-    if (!response.ok) throw new Error("Service RSS indisponible");
-
-    const xmlText = await response.text();
-    const xml = new DOMParser().parseFromString(xmlText, "text/xml");
-
-    if (xml.querySelector("parsererror")) {
-      throw new Error("Flux RSS illisible");
-    }
-
-    xml.querySelectorAll("item").forEach(item => {
-      all.push({
-        title:item.querySelector("title")?.textContent || "",
-        url:item.querySelector("link")?.textContent || "",
-        date:item.querySelector("pubDate")?.textContent || Date.now(),
-        domain:getDomain(item.querySelector("link")?.textContent || "")
-      });
-    });
-  }
-
-  const normalized = normalizeNews(all);
-  if (!normalized.length) throw new Error("Aucun article RSS");
-  return normalized;
-}
-
-/* -------------------------------------------------------
-   AFFICHAGE ACTUALITES
-------------------------------------------------------- */
-
-function renderNews() {
-  const filter = $("newsFilter").value;
-  const filtered = filter === "all"
-    ? state.news
-    : state.news.filter(item => item.topic === filter);
-
-  $("statNews").textContent = state.news.length;
-
-  if (!filtered.length) {
-    $("news").innerHTML = '<div class="empty">Aucun article ne correspond à ce filtre.</div>';
-    return;
-  }
-
-  $("news").innerHTML = filtered.map(item => `
-    <article class="news-item">
-      <div class="news-top">
-        <span class="tag blue">${escapeHTML(topicLabel(item.topic))}</span>
-        <span class="status">${escapeHTML(timeAgo(item.date))}</span>
-      </div>
-      <div class="item-title">
-        <a href="${safeURL(item.url)}" target="_blank" rel="noopener">
-          ${escapeHTML(item.title)}
-        </a>
-      </div>
-      <div class="item-meta">
-        ${escapeHTML(item.domain)} · ${formatDate(item.date)}
-      </div>
-    </article>
-  `).join("");
-}
-
-async function loadNews() {
-  $("newsStatus").textContent = "Tentative de connexion à GDELT…";
-
-  try {
-    state.news = await loadGDELT();
-    state.newsSource = "GDELT";
-    $("newsStatus").textContent = `Source : GDELT · ${state.news.length} articles`;
-  } catch (error) {
-    console.warn("GDELT indisponible, tentative RSS :", error);
-
-    $("newsStatus").textContent = "GDELT indisponible · Recherche d'une source de secours…";
-
-    try {
-      state.news = await loadGoogleNews();
-      state.newsSource = "Google Actualités RSS";
-      $("newsStatus").textContent =
-        `Source de secours : Google Actualités · ${state.news.length} articles`;
-    } catch (rssError) {
-      console.error("Flux d'actualités :", rssError);
-      state.news = [];
-      state.newsSource = "Indisponible";
-      $("newsStatus").textContent =
-        "Les sources d'actualités sont momentanément indisponibles.";
-    }
-  }
-
-  renderNews();
-  buildAlerts();
-}
-
-/* -------------------------------------------------------
-   INDICATEURS ECONOMIQUES
-------------------------------------------------------- */
-
-async function loadEconomic() {
-  const container = $("economic");
-
-  try {
-    const data = await getJSON(
-      "https://api.frankfurter.app/latest?from=EUR&to=USD,GBP,CHF,JPY"
-    );
-
-    const rates = data.rates || {};
-
-    const indicators = [
-      {name:"Euro / Dollar",value:rates.USD,detail:"1 EUR en USD"},
-      {name:"Euro / Livre sterling",value:rates.GBP,detail:"1 EUR en GBP"},
-      {name:"Euro / Franc suisse",value:rates.CHF,detail:"1 EUR en CHF"},
-      {name:"Euro / Yen",value:rates.JPY,detail:"1 EUR en JPY"}
-    ];
-
-    container.innerHTML = indicators.map(item => `
-      <div class="economic-card">
-        <div class="economic-name">${item.name}</div>
-        <div class="economic-value">
-          ${item.value ? Number(item.value).toFixed(3) : "—"}
-        </div>
-        <div class="economic-detail">${item.detail}</div>
-      </div>
-    `).join("");
-
-    $("economicStatus").textContent = "Taux de change · " + (data.date || "Date inconnue");
-
-  } catch (error) {
-    console.error("Économie :", error);
-    $("economicStatus").textContent = "Indicateur indisponible";
-    container.innerHTML = `
-      <div class="empty">
-        Impossible de récupérer les taux de change pour le moment.
-      </div>
-    `;
-  }
-}
-
-/* -------------------------------------------------------
-   ALERTES
-------------------------------------------------------- */
-
-function buildAlerts() {
-  const alerts = [];
-
-  state.quakes.forEach(item => {
-    const magnitude = Number(item.properties.mag || 0);
-
-    if (magnitude >= 5) {
-      alerts.push({
-        level:magnitude >= 6 ? "red" : "orange",
-        label:magnitude >= 6 ? "Séisme majeur" : "Séisme significatif",
-        title:item.properties.place || "Localisation inconnue",
-        detail:`Magnitude ${magnitude.toFixed(1)} · ${timeAgo(item.properties.time)}`,
-        date:item.properties.time || 0
-      });
-    }
-  });
-
-  state.news.forEach(item => {
-    const title = item.title.toLowerCase();
-
-    if (item.topic === "conflit" &&
-        /attaque|offensive|missile|bombardement|invasion|escalade|strike|war/.test(title)) {
-      alerts.push({
-        level:"orange",
-        label:"Actualité de sécurité",
-        title:item.title,
-        detail:`${item.domain} · ${timeAgo(item.date)}`,
-        date:new Date(item.date).getTime() || 0
-      });
-    }
-
-    if (item.topic === "catastrophe") {
-      alerts.push({
-        level:"orange",
-        label:"Catastrophe signalée",
-        title:item.title,
-        detail:`${item.domain} · ${timeAgo(item.date)}`,
-        date:new Date(item.date).getTime() || 0
-      });
-    }
-  });
-
-  state.alerts = alerts
-    .sort((a,b) => b.date - a.date)
-    .slice(0, 12);
-
-  renderAlerts();
-}
-
-function renderAlerts() {
-  $("statAlerts").textContent = state.alerts.length;
-  $("alertStatus").textContent = `${state.alerts.length} signalements`;
-
-  if (!state.alerts.length) {
-    $("alerts").innerHTML = `
-      <div class="empty">
-        Aucun signalement correspondant aux critères actuels.
-        Cela ne signifie pas qu'aucun événement important n'est en cours.
-      </div>
-    `;
-    return;
-  }
-
-  $("alerts").innerHTML = state.alerts.map(alert => `
-    <div class="alert-item">
-      <div class="alert-top">
-        <span class="tag ${alert.level}">${escapeHTML(alert.label)}</span>
-      </div>
-      <div class="item-title">${escapeHTML(alert.title)}</div>
-      <div class="item-meta">${escapeHTML(alert.detail)}</div>
-    </div>
-  `).join("");
-}
-
-/* -------------------------------------------------------
+/* =====================================================
    HISTORIQUE LOCAL
-------------------------------------------------------- */
+===================================================== */
 
-function readHistory() {
+function loadHistory() {
   try {
-    const saved = JSON.parse(localStorage.getItem("worldRadarHistory") || "[]");
-    state.history = Array.isArray(saved) ? saved : [];
+    const value = JSON.parse(localStorage.getItem("wr_history") || "[]");
+    state.history = Array.isArray(value) ? value : [];
   } catch {
     state.history = [];
   }
   renderHistory();
 }
 
-function addHistory(title, detail) {
-  const entry = {
-    title,
-    detail,
-    date:Date.now()
-  };
-
-  const exists = state.history.some(item =>
-    item.title === title &&
-    Date.now() - item.date < 60000
+function recordHistory(title,detail) {
+  const duplicate = state.history.some(x =>
+    x.title === title && Date.now()-x.date < 60000
   );
+  if (duplicate) return;
 
-  if (exists) return;
-
-  state.history.unshift(entry);
-  state.history = state.history.slice(0, CONFIG.historyLimit);
+  state.history.unshift({title,detail,date:Date.now()});
+  state.history = state.history.slice(0,CONFIG.historyLimit);
 
   try {
-    localStorage.setItem("worldRadarHistory", JSON.stringify(state.history));
-  } catch (error) {
-    console.warn("Historique local indisponible", error);
-  }
+    localStorage.setItem("wr_history",JSON.stringify(state.history));
+  } catch {}
 
   renderHistory();
 }
@@ -1088,68 +452,540 @@ function renderHistory() {
     return;
   }
 
-  $("history").innerHTML = state.history.slice(0, 15).map(item => `
+  $("history").innerHTML = state.history.slice(0,20).map(item=>`
     <div class="history-item">
-      <div class="item-title">${escapeHTML(item.title)}</div>
-      <div class="item-meta">${escapeHTML(item.detail)} · ${timeAgo(item.date)}</div>
+      <div class="article-title">${escapeHTML(item.title)}</div>
+      <div class="meta">${escapeHTML(item.detail)} · ${ago(item.date)}</div>
     </div>
   `).join("");
 }
 
-/* -------------------------------------------------------
-   ACTUALISATION GENERALE
-------------------------------------------------------- */
+/* =====================================================
+   CARTE
+===================================================== */
+
+function initMap() {
+  if (typeof L === "undefined") {
+    setText("mapStatus","Bibliothèque cartographique indisponible");
+    return;
+  }
+
+  state.map = L.map("map").setView([22,10],2);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    maxZoom:18,
+    attribution:'&copy; OpenStreetMap contributors'
+  }).addTo(state.map);
+
+  state.quakeLayer = L.layerGroup().addTo(state.map);
+  state.zoneLayer = L.layerGroup().addTo(state.map);
+
+  zones.forEach(zone=>{
+    const marker = L.circleMarker([zone.lat,zone.lon],{
+      radius:7,color:zone.color,fillColor:zone.color,
+      fillOpacity:.7,weight:1
+    });
+    marker.bindPopup(
+      `<strong>${escapeHTML(zone.name)}</strong><br>${escapeHTML(zone.detail)}<br><em>Repère géographique de veille — pas un événement confirmé.</em>`
+    );
+    marker.addTo(state.zoneLayer);
+  });
+
+  L.control.layers(null,{
+    "Zones de veille":state.zoneLayer,
+    "Séismes":state.quakeLayer
+  },{collapsed:true}).addTo(state.map);
+
+  setText("mapStatus","Carte interactive opérationnelle");
+}
+
+function renderQuakeMap() {
+  if (!state.quakeLayer) return;
+  state.quakeLayer.clearLayers();
+
+  const items = state.quakesDay;
+
+  items.forEach(item=>{
+    const p = item.properties;
+    const c = item.geometry.coordinates;
+    const mag = Number(p.mag || 0);
+    const color = mag >= 6 ? "#c97878" : mag >= 4 ? "#d0a36d" : "#82ad98";
+
+    const marker = L.circleMarker([c[1],c[0]],{
+      radius:Math.max(4,Math.min(14,mag*2)),
+      color,fillColor:color,fillOpacity:.7,weight:1
+    });
+
+    marker.bindPopup(`
+      <strong>${escapeHTML(p.place || "Lieu inconnu")}</strong><br>
+      Magnitude : ${mag.toFixed(1)}<br>
+      Profondeur : ${Number(c[2]).toFixed(1)} km<br>
+      ${dateText(p.time)}<br>
+      <a href="${safeURL(p.url)}" target="_blank" rel="noopener">Consulter USGS</a>
+    `);
+    marker.addTo(state.quakeLayer);
+  });
+}
+
+function renderZones() {
+  $("zones").innerHTML = zones.map(z=>`
+    <div class="zone">
+      <strong>${escapeHTML(z.name)}</strong>
+      <span class="small">${escapeHTML(z.detail)}</span>
+    </div>
+  `).join("");
+}
+
+/* =====================================================
+   SEISMES USGS
+===================================================== */
+
+async function loadQuakes() {
+  const urls = {
+    day:"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson",
+    week:"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+  };
+
+  try {
+    const [day,week] = await Promise.all([
+      fetchJSON(urls.day),
+      fetchJSON(urls.week)
+    ]);
+
+    state.quakesDay = day.features || [];
+    state.quakesWeek = week.features || [];
+
+    setText("statQuakes",state.quakesDay.length);
+    setText("quakeStatus",`${state.quakesDay.length} événements sur 24 h · ${state.quakesWeek.length} sur 7 jours`);
+
+    renderQuakes();
+    renderQuakeMap();
+    buildAlerts();
+
+    recordHistory("Données sismiques actualisées",
+      `${state.quakesDay.length} événements sur 24 h.`);
+  } catch(error) {
+    console.error("USGS",error);
+    setText("quakeStatus","Flux USGS indisponible");
+    $("quakes").innerHTML = '<div class="empty">Impossible de récupérer les données sismiques. Réessaie ultérieurement.</div>';
+  }
+}
+
+function renderQuakes() {
+  const items = state.quakePeriod === "week" ? state.quakesWeek : state.quakesDay;
+
+  if (!items.length) {
+    $("quakes").innerHTML = '<div class="empty">Aucun événement disponible dans ce flux.</div>';
+    return;
+  }
+
+  $("quakes").innerHTML = items.slice(0,20).map(item=>{
+    const p = item.properties;
+    const c = item.geometry.coordinates;
+    const mag = Number(p.mag || 0);
+    const color = mag >= 6 ? "red" : mag >= 4 ? "orange" : "green";
+
+    return `
+      <article class="article">
+        <div class="article-top">
+          <span class="tag ${color}">Magnitude ${mag.toFixed(1)}</span>
+          <span class="small">${ago(p.time)}</span>
+        </div>
+        <div class="article-title">${escapeHTML(p.place || "Localisation inconnue")}</div>
+        <div class="meta">Profondeur : ${Number(c[2]).toFixed(1)} km · ${dateText(p.time)} · <a href="${safeURL(p.url)}" target="_blank" rel="noopener">USGS</a></div>
+      </article>
+    `;
+  }).join("");
+}
+
+/* =====================================================
+   CLASSIFICATION DES ACTUALITES
+===================================================== */
+
+const patterns = {
+  conflit:/war|guerre|armed conflict|conflit armé|offensive|attaque|airstrike|bombardement|invasion|combat|fighting|frontline|battle|military operation|opération militaire/i,
+  diplomatie:/diplomacy|diplomatie|summit|sommet|negotiation|négociation|foreign minister|ministre des affaires étrangères|bilateral|ceasefire|cessez-le-feu|peace talks|pourparlers/i,
+  politique:/election|élection|government|gouvernement|president|président|parliament|parlement|coup|cabinet|minister|ministre|political crisis|crise politique/i,
+  securite:/security|sécurité|defence|défense|defense|military|militaire|terrorism|terrorisme|intelligence|espionnage|cyberattack|cyberattaque|nato|otan/i,
+  sanctions:/sanction|embargo|restriction|export ban|gel des avoirs|asset freeze|trade ban/i,
+  energie:/energy|énergie|oil|pétrole|gas|gaz naturel|electricity|électricité|nuclear|nucléaire|pipeline|oléoduc|opec/i,
+  maritime:/shipping|maritime|red sea|mer rouge|strait|détroit|hormuz|ormuz|suez|port|container|navire|naval|piracy|piraterie|trade route|route commerciale/i,
+  humanitaire:/humanitarian|humanitaire|refugee|réfugié|displacement|déplacement de population|famine|food crisis|crise alimentaire|aid convoy|aide humanitaire/i,
+  economie:/economy|économie|economic|économique|inflation|market|marché|trade|commerce|tariff|droit de douane|debt|dette|currency|monnaie|commodity|matière première|food price|prix alimentaire/i
+};
+
+function classify(title) {
+  const found = [];
+  for (const [category,regex] of Object.entries(patterns)) {
+    if (regex.test(title)) found.push(category);
+  }
+  return found.length ? found : ["politique"];
+}
+
+const labels = {
+  conflit:"Conflits",
+  diplomatie:"Diplomatie",
+  politique:"Politique",
+  securite:"Sécurité",
+  sanctions:"Sanctions",
+  energie:"Énergie",
+  maritime:"Maritime",
+  humanitaire:"Humanitaire",
+  economie:"Économie"
+};
+
+function articleLevel(title,categories) {
+  const t = title.toLowerCase();
+
+  if (/invasion|mass casualty|massacre|nuclear attack|attaque nucléaire|coup d'état|coup d’etat/.test(t)) return "red";
+  if (/missile|airstrike|bombardement|offensive|attaque|explosion|terror|sanction|embargo|blockade|blocus/.test(t)) return "orange";
+  if (categories.includes("conflit") || categories.includes("securite")) return "yellow";
+  return "blue";
+}
+
+function levelLabel(level) {
+  return {
+    red:"Signal fort",
+    orange:"Signal élevé",
+    yellow:"À surveiller",
+    blue:"Information"
+  }[level] || "Information";
+}
+
+/* =====================================================
+   GDELT — FLUX PRINCIPAL
+===================================================== */
+
+async function loadGDELT() {
+  const query = [
+    "geopolitics","geopolitical","international conflict",
+    "war","military","diplomacy","sanctions","election",
+    "political crisis","security","energy","oil",
+    "shipping","maritime","humanitarian",
+    "conflit","guerre","diplomatie","sanctions",
+    "élection","sécurité","énergie","pétrole",
+    "transport maritime","crise humanitaire"
+  ].join(" OR ");
+
+  const params = new URLSearchParams({
+    query,
+    mode:"ArtList",
+    format:"json",
+    maxrecords:"250",
+    sort:"DateDesc"
+  });
+
+  const data = await fetchJSON(
+    "https://api.gdeltproject.org/api/v2/doc/doc?"+params.toString(),
+    25000
+  );
+
+  if (!data.articles || !data.articles.length) {
+    throw new Error("GDELT n'a renvoyé aucun article");
+  }
+
+  return data.articles.map(item=>({
+    title:item.title || "",
+    url:item.url || "",
+    date:item.seendate || Date.now(),
+    domain:item.domain || domainOf(item.url || ""),
+    source:"GDELT"
+  }));
+}
+
+/* =====================================================
+   GOOGLE NEWS RSS — SOURCE DE SECOURS
+===================================================== */
+
+async function loadRSS() {
+  const query = "géopolitique OR guerre OR diplomatie OR sanctions OR énergie OR sécurité internationale";
+  const rss = "https://news.google.com/rss/search?q="+
+    encodeURIComponent(query)+"&hl=fr&gl=FR&ceid=FR:fr";
+
+  const proxy = "https://api.allorigins.win/raw?url="+encodeURIComponent(rss);
+  const response = await fetch(proxy,{cache:"no-store"});
+
+  if (!response.ok) throw new Error("Proxy RSS indisponible");
+
+  const xmlText = await response.text();
+  const xml = new DOMParser().parseFromString(xmlText,"text/xml");
+
+  if (xml.querySelector("parsererror")) throw new Error("RSS illisible");
+
+  const items = [...xml.querySelectorAll("item")].map(item=>({
+    title:item.querySelector("title")?.textContent || "",
+    url:item.querySelector("link")?.textContent || "",
+    date:item.querySelector("pubDate")?.textContent || Date.now(),
+    domain:domainOf(item.querySelector("link")?.textContent || ""),
+    source:"Google Actualités"
+  }));
+
+  if (!items.length) throw new Error("Flux RSS vide");
+  return items;
+}
+
+/* =====================================================
+   NORMALISATION ET AFFICHAGE DES ACTUALITES
+===================================================== */
+
+function normalizeArticles(items) {
+  const seen = new Set();
+
+  return items.map(item=>{
+    const title = String(item.title || "").trim();
+    const url = safeURL(item.url);
+    if (!title || url === "#") return null;
+
+    const key = title.toLowerCase();
+    if (seen.has(key)) return null;
+    seen.add(key);
+
+    const categories = classify(title);
+    const date = dateValue(item.date);
+
+    return {
+      title,url,date,
+      domain:item.domain || domainOf(url),
+      source:item.source || "Source externe",
+      categories,
+      level:articleLevel(title,categories)
+    };
+  }).filter(Boolean)
+    .sort((a,b)=>b.date-a.date)
+    .slice(0,CONFIG.maxArticles);
+}
+
+async function loadNews() {
+  setText("newsStatus","Connexion au flux GDELT…");
+
+  let raw = [];
+
+  try {
+    raw = await loadGDELT();
+    state.source = "GDELT";
+  } catch(error) {
+    console.warn("GDELT indisponible",error);
+    setText("newsStatus","GDELT indisponible — essai du flux RSS de secours…");
+
+    try {
+      raw = await loadRSS();
+      state.source = "Google Actualités RSS";
+    } catch(rssError) {
+      console.error("RSS indisponible",rssError);
+      state.articles = [];
+      setText("newsStatus","Les sources d'actualités sont temporairement indisponibles.");
+      renderNews();
+      buildAlerts();
+      return;
+    }
+  }
+
+  state.articles = normalizeArticles(raw);
+
+  setText("newsStatus",`${state.articles.length} articles · Source : ${state.source}`);
+  setText("statNews",state.articles.length);
+  setText("statSecurity",state.articles.filter(a=>a.categories.includes("conflit") || a.categories.includes("securite")).length);
+  setText("statEconomy",state.articles.filter(a=>a.categories.includes("economie") || a.categories.includes("energie") || a.categories.includes("maritime")).length);
+
+  renderNews();
+  buildAlerts();
+  recordHistory("Flux géopolitique actualisé",`${state.articles.length} articles collectés via ${state.source}.`);
+}
+
+function renderNews() {
+  const filtered = state.articleFilter === "all"
+    ? state.articles
+    : state.articles.filter(a=>a.categories.includes(state.articleFilter));
+
+  if (!filtered.length) {
+    $("news").innerHTML = '<div class="empty">Aucun article dans cette catégorie pour le moment.</div>';
+    return;
+  }
+
+  $("news").innerHTML = filtered.map(article=>{
+    const categoryTags = article.categories.slice(0,3).map(category=>
+      `<span class="tag">${escapeHTML(labels[category] || category)}</span>`
+    ).join(" ");
+
+    return `
+      <article class="article">
+        <div class="article-top">
+          <div>${categoryTags}</div>
+          <span class="tag ${article.level}">${levelLabel(article.level)}</span>
+        </div>
+        <div class="article-title">
+          <a href="${safeURL(article.url)}" target="_blank" rel="noopener">${escapeHTML(article.title)}</a>
+        </div>
+        <div class="meta">${escapeHTML(article.domain)} · ${ago(article.date)} · ${dateText(article.date)}</div>
+      </article>
+    `;
+  }).join("");
+}
+
+/* =====================================================
+   ALERTES AUTOMATIQUES
+===================================================== */
+
+function buildAlerts() {
+  const alerts = [];
+
+  state.articles.forEach(article=>{
+    if (article.level === "red" || article.level === "orange" || article.level === "yellow") {
+      alerts.push({
+        level:article.level,
+        title:article.title,
+        detail:`${article.domain} · ${ago(article.date)}`,
+        date:article.date,
+        url:article.url
+      });
+    }
+  });
+
+  state.quakesDay.forEach(item=>{
+    const mag = Number(item.properties.mag || 0);
+    if (mag >= 5) {
+      alerts.push({
+        level:mag >= 6 ? "red" : "orange",
+        title:`Séisme de magnitude ${mag.toFixed(1)} — ${item.properties.place || "lieu inconnu"}`,
+        detail:`USGS · ${ago(item.properties.time)}`,
+        date:dateValue(item.properties.time),
+        url:item.properties.url
+      });
+    }
+  });
+
+  state.alerts = alerts.sort((a,b)=>b.date-a.date).slice(0,18);
+
+  setText("statAlerts",state.alerts.length);
+  setText("alertStatus",`${state.alerts.length} signaux détectés`);
+
+  if (!state.alerts.length) {
+    $("alerts").innerHTML = '<div class="empty">Aucun signal ne correspond actuellement aux critères automatiques. Cela ne signifie pas qu’aucun événement important n’est en cours.</div>';
+    return;
+  }
+
+  $("alerts").innerHTML = state.alerts.map(alert=>`
+    <div class="alert-item">
+      <div class="article-top">
+        <span class="tag ${alert.level}">${levelLabel(alert.level)}</span>
+        <span class="small">${ago(alert.date)}</span>
+      </div>
+      <div class="alert-title">
+        <a href="${safeURL(alert.url)}" target="_blank" rel="noopener">${escapeHTML(alert.title)}</a>
+      </div>
+      <div class="meta">${escapeHTML(alert.detail)}</div>
+    </div>
+  `).join("");
+}
+
+/* =====================================================
+   INDICATEURS ECONOMIQUES
+===================================================== */
+
+async function loadEconomic() {
+  try {
+    const data = await fetchJSON(
+      "https://api.frankfurter.app/latest?from=EUR&to=USD,GBP,CHF,JPY,CNY",
+      15000
+    );
+
+    const rates = data.rates || {};
+
+    const indicators = [
+      ["EUR / USD",rates.USD,"Dollar américain"],
+      ["EUR / GBP",rates.GBP,"Livre sterling"],
+      ["EUR / CHF",rates.CHF,"Franc suisse"],
+      ["EUR / JPY",rates.JPY,"Yen japonais"],
+      ["EUR / CNY",rates.CNY,"Yuan chinois"]
+    ];
+
+    $("economic").innerHTML = indicators.map(item=>`
+      <div class="econ-card">
+        <div class="econ-name">${item[0]}</div>
+        <div class="econ-value">${item[1] ? Number(item[1]).toFixed(3) : "—"}</div>
+        <div class="econ-detail">${item[2]}</div>
+      </div>
+    `).join("");
+
+    setText("economicStatus",`Taux de référence · ${data.date || "Date inconnue"}`);
+  } catch(error) {
+    console.error("Frankfurter",error);
+    setText("economicStatus","Indicateur indisponible");
+    $("economic").innerHTML = '<div class="empty">Les taux de change ne sont pas disponibles actuellement.</div>';
+  }
+}
+
+/* =====================================================
+   FILTRES
+===================================================== */
+
+document.querySelectorAll("[data-filter]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll("[data-filter]").forEach(b=>b.classList.remove("active"));
+    button.classList.add("active");
+    state.articleFilter = button.dataset.filter;
+    renderNews();
+  });
+});
+
+document.querySelectorAll("[data-quake]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll("[data-quake]").forEach(b=>b.classList.remove("active"));
+    button.classList.add("active");
+    state.quakePeriod = button.dataset.quake;
+    renderQuakes();
+  });
+});
+
+$("refreshNews").addEventListener("click",loadNews);
+
+$("clearHistory").addEventListener("click",()=>{
+  state.history = [];
+  try { localStorage.removeItem("wr_history"); } catch {}
+  renderHistory();
+});
+
+/* =====================================================
+   ACTUALISATION
+===================================================== */
+
+let refreshing = false;
 
 async function refreshAll() {
-  $("lastUpdate").textContent = "Actualisation en cours…";
+  if (refreshing) return;
+  refreshing = true;
 
-  await Promise.allSettled([
-    loadEarthquakes(),
+  setText("connection","Actualisation…");
+  setText("lastUpdate","Actualisation des flux en cours…");
+
+  const results = await Promise.allSettled([
+    loadQuakes(),
     loadNews(),
     loadEconomic()
   ]);
 
+  const failed = results.filter(x=>x.status==="rejected").length;
+  setText("connection",failed ? "Certains flux sont indisponibles" : "Flux interrogés");
+
   const now = new Date();
+  setText("lastUpdate","Dernière actualisation : "+now.toLocaleTimeString("fr-FR"));
 
-  $("lastUpdate").textContent =
-    "Dernière actualisation : " + now.toLocaleTimeString("fr-FR", {
-      hour:"2-digit",
-      minute:"2-digit",
-      second:"2-digit"
-    });
-
-  $("statTime").textContent = now.toLocaleTimeString("fr-FR", {
-    hour:"2-digit",
-    minute:"2-digit"
-  });
-
-  addHistory("Actualisation générale", "Les flux de données ont été interrogés.");
+  recordHistory("Actualisation générale","Interrogation des sources de données.");
+  refreshing = false;
 }
 
-/* -------------------------------------------------------
-   EVENEMENTS ET DEMARRAGE
-------------------------------------------------------- */
+/* =====================================================
+   DEMARRAGE
+===================================================== */
 
-$("newsFilter").addEventListener("change", renderNews);
-
-$("refreshNews").addEventListener("click", loadNews);
-
-$("clearHistory").addEventListener("click", () => {
-  state.history = [];
-  try {
-    localStorage.removeItem("worldRadarHistory");
-  } catch {}
-  renderHistory();
-});
-
-readHistory();
+loadHistory();
+renderZones();
 initMap();
 refreshAll();
 
-setInterval(refreshAll, CONFIG.refreshInterval);
+setInterval(refreshAll,CONFIG.refresh);
 
 })();
 </script>
-
 </body>
 </html>
