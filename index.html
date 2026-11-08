@@ -2,339 +2,267 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07111f">
-<title>WORLD RADAR — Global Intelligence</title>
+<title>WORLD RADAR — Intelligence & Situation mondiale</title>
 <link rel="preconnect" href="https://unpkg.com">
-<link rel="preconnect" href="https://tile.openstreetmap.org">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--bg:#07111f;--panel:#0d1b2c;--panel2:#102238;--line:#233951;--text:#eaf2fb;--muted:#91a7bf;--blue:#4ba3ff;--cyan:#56d5d0;--red:#ff626d;--amber:#f4bd59;--purple:#b28cff;--green:#63d6a0}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#173354 0%,var(--bg) 55%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-a{color:#80bdff;text-decoration:none}a:hover{color:#c0e0ff;text-decoration:underline}
-header{border-bottom:1px solid var(--line);background:rgba(7,17,31,.88);position:sticky;top:0;z-index:1000;backdrop-filter:blur(14px)}
-.top{max-width:1600px;margin:auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px}
-.brand{display:flex;align-items:center;gap:13px}.mark{width:39px;height:39px;border:1px solid #3e6b94;border-radius:12px;display:grid;place-items:center;color:var(--cyan);font-size:21px;background:#10253b;box-shadow:0 0 24px #2d89d322}
-h1{font-size:20px;letter-spacing:3px;margin:0;font-weight:800}.subtitle{font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:3px}
-.topright{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:11px}.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:6px}
-main{max-width:1600px;margin:auto;padding:20px 22px 50px}.eyebrow{font-size:10px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;font-weight:700}
-.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:8px 0 18px}.hero h2{font-size:clamp(24px,4vw,38px);margin:7px 0 5px;letter-spacing:-1px}.hero p{margin:0;color:var(--muted);font-size:13px;max-width:720px;line-height:1.6}
-.actions{display:flex;gap:8px;flex-wrap:wrap}.btn,.chip{border:1px solid #36516e;background:#12263d;color:#dcecff;padding:9px 12px;border-radius:9px;font-size:12px;cursor:pointer}.btn:hover,.chip:hover{background:#1b3858}.btn.primary{background:#14528a;border-color:#287bbd}.btn:disabled{opacity:.5;cursor:wait}
-.gridstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.stat,.panel{background:linear-gradient(145deg,rgba(17,37,59,.96),rgba(10,25,42,.98));border:1px solid var(--line);border-radius:14px;min-width:0}.stat{padding:14px 16px}.stat small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}.stat strong{display:block;font-size:25px;margin-top:7px;letter-spacing:-.5px}.stat em{font-size:10px;color:var(--muted);font-style:normal}
-.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);gap:14px}.panel{padding:16px;margin-bottom:14px}.panelhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}.panel h3{font-size:15px;margin:0}.muted{color:var(--muted);font-size:11px;line-height:1.55}
-#map{height:430px;border-radius:11px;border:1px solid #2a425b;overflow:hidden;background:#0b1928}.mapnote{margin-top:8px;color:var(--muted);font-size:10px}
-.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.chip{padding:8px 11px;font-size:11px}.chip.active{background:#15548c;border-color:#4097db;color:white}
-.feedhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.feedlist{display:grid;grid-template-columns:1fr 1fr;gap:10px}.story{background:#0a1929;border:1px solid #263c54;border-radius:11px;padding:13px;min-width:0;transition:.15s}.story:hover{border-color:#4b83b5;transform:translateY(-1px)}.story h4{font-size:13px;line-height:1.45;margin:7px 0 8px}.meta{font-size:10px;color:var(--muted);line-height:1.5}.storyfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}.tag{font-size:9px;text-transform:uppercase;letter-spacing:.8px;padding:4px 7px;border:1px solid #3d5875;border-radius:30px;color:#bdd5ed}.tag.conflict{color:#ff9da4;border-color:#80414a}.tag.diplomacy{color:#8ec7ff;border-color:#356c9a}.tag.security{color:#c9adff;border-color:#674e91}.tag.politics{color:#f4d18a;border-color:#806a3e}.tag.economy{color:#8ee0ba;border-color:#39765b}.tag.humanitarian{color:#ffbd91;border-color:#85563c}.tag.maritime{color:#8fe5e8;border-color:#397a7d}.tag.cyber{color:#d2a8ff;border-color:#73518e}.tag.environment{color:#a5dfa1;border-color:#477a49}
-.read{font-size:11px;font-weight:700}.status{padding:10px 12px;background:#0a1929;border:1px solid #2a425b;border-radius:9px;color:var(--muted);font-size:11px;line-height:1.5;margin:10px 0}.status.good{border-color:#286b54;color:#9de2c0}.status.warn{border-color:#80683a;color:#f2d28b}.status.error{border-color:#80414a;color:#ffb0b5}
-.sidebox{padding:13px;border:1px solid #263c54;background:#0a1929;border-radius:10px;margin-bottom:9px}.sidebox h4{font-size:12px;margin:0 0 6px}.sidebox p{font-size:10px;color:var(--muted);line-height:1.5;margin:0 0 8px}.sidebox a{font-size:11px;margin-right:9px}
-.sources{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.source{padding:12px;border:1px solid #29415b;border-radius:10px;background:#0a1929}.source strong{font-size:12px;display:block;margin-bottom:5px}.source span{font-size:10px;color:var(--muted);display:block;line-height:1.45;min-height:30px}.source a{display:inline-block;margin-top:8px;font-size:10px}
-.section{margin-top:18px}.sectiontitle{display:flex;justify-content:space-between;align-items:end;gap:10px;margin:0 0 10px}.sectiontitle h3{margin:0;font-size:17px}.sectiontitle p{margin:4px 0 0}
-.fallback{display:none;margin-top:12px}.fallback iframe{width:100%;height:480px;border:1px solid var(--line);border-radius:10px;background:white}.fallback.visible{display:block}
-.empty{padding:22px 10px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6;grid-column:1/-1}
-#earthquakeList{max-height:290px;overflow:auto}.quake{padding:8px 0;border-bottom:1px solid #263c54;font-size:11px;line-height:1.5}
-footer{border-top:1px solid var(--line);padding:20px;text-align:center;color:#7289a3;font-size:10px;line-height:1.7}
-@media(max-width:900px){.layout{grid-template-columns:1fr}.gridstats{grid-template-columns:repeat(2,1fr)}.sources{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:580px){main{padding:15px 12px 35px}.top{padding:12px}.topright{display:none}.hero{display:block}.hero .actions{margin-top:12px}.feedlist{grid-template-columns:1fr}.sources{grid-template-columns:1fr}.stat strong{font-size:21px}#map{height:340px}}
+:root{
+ --bg:#07111f;--panel:#0d1b2c;--panel2:#10243a;--line:#263d56;
+ --text:#eaf2fb;--muted:#91a7bf;--blue:#4ba3ff;--cyan:#56d5d0;
+ --red:#ff6975;--amber:#f4bd59;--green:#63d6a0;--purple:#b28cff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#173354 0%,var(--bg) 58%);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:#86c1ff;text-decoration:none}
+a:hover{text-decoration:underline;color:#c6e3ff}
+button,input,select{font:inherit}
+header{position:sticky;top:0;z-index:1000;background:#07111fee;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top{max-width:1650px;margin:auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border:1px solid #3c719d;border-radius:12px;background:#102940;display:grid;place-items:center;color:var(--cyan);font-size:24px}
+.brand h1{margin:0;font-size:19px;letter-spacing:3px}
+.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px;margin-top:4px}
+.topright{display:flex;gap:14px;align-items:center;color:var(--muted);font-size:11px}
+.live{width:7px;height:7px;background:var(--green);display:inline-block;border-radius:50%;margin-right:6px;box-shadow:0 0 10px var(--green)}
+nav{max-width:1650px;margin:auto;padding:0 22px 12px;display:flex;gap:7px;overflow-x:auto}
+nav a{white-space:nowrap;color:#b6c9dc;border:1px solid transparent;border-radius:7px;padding:7px 10px;font-size:11px}
+nav a:hover{background:#142a42;border-color:#34516f;text-decoration:none}
+main{max-width:1650px;margin:auto;padding:22px}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:4px 0 20px}
+.eyebrow{font-size:10px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.hero h2{font-size:clamp(26px,4vw,40px);letter-spacing:-1px;margin:8px 0}
+.hero p{max-width:760px;color:var(--muted);font-size:13px;line-height:1.65;margin:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn,.chip{cursor:pointer;border:1px solid #36516e;background:#12263d;color:#e2efff;padding:9px 12px;border-radius:8px;font-size:11px}
+.btn:hover,.chip:hover{background:#1b3a5b}
+.btn.primary{background:#14528a;border-color:#287bbd}
+.btn:disabled{opacity:.5;cursor:wait}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0}
+.stat,.panel{background:linear-gradient(145deg,#11253b,#0a192a);border:1px solid var(--line);border-radius:13px;min-width:0}
+.stat{padding:14px}
+.stat small{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1.2px}
+.stat strong{display:block;font-size:25px;margin:7px 0 3px}
+.stat em{font-style:normal;color:var(--muted);font-size:9px}
+.panel{padding:16px;margin-bottom:14px}
+.panelhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.panel h3{font-size:15px;margin:0}
+.muted{font-size:11px;color:var(--muted);line-height:1.6}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.8fr);gap:14px}
+#map{height:450px;border-radius:10px;border:1px solid #2b455f;background:#0a1928}
+.mapnote{font-size:10px;color:var(--muted);margin-top:8px}
+.status{padding:10px 12px;background:#0a1929;border:1px solid #2a425b;border-radius:8px;color:var(--muted);font-size:11px;line-height:1.5;margin:10px 0}
+.status.good{border-color:#286b54;color:#9de2c0}
+.status.warn{border-color:#80683a;color:#f2d28b}
+.status.error{border-color:#80414a;color:#ffb0b5}
+.section{margin-top:20px;scroll-margin-top:115px}
+.sectiontitle{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:11px}
+.sectiontitle h3{font-size:19px;margin:5px 0}
+.sectiontitle p{margin:0}
+.feedgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.story{background:#0a1929;border:1px solid #263c54;border-radius:10px;padding:13px;min-width:0}
+.story h4{font-size:13px;line-height:1.5;margin:8px 0}
+.story .meta{font-size:10px;color:var(--muted);line-height:1.5}
+.storyfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.tag{font-size:9px;text-transform:uppercase;letter-spacing:.7px;border:1px solid #3d5875;border-radius:20px;padding:4px 7px;color:#bdd5ed}
+.tag.conflict{color:#ff9da4;border-color:#80414a}
+.tag.diplomacy{color:#8ec7ff;border-color:#356c9a}
+.tag.security{color:#c9adff;border-color:#674e91}
+.tag.economy{color:#8ee0ba;border-color:#39765b}
+.tag.humanitarian{color:#ffbd91;border-color:#85563c}
+.tag.maritime{color:#8fe5e8;border-color:#397a7d}
+.tag.cyber{color:#d2a8ff;border-color:#73518e}
+.tag.environment{color:#a5dfa1;border-color:#477a49}
+.tag.politics{color:#f4d18a;border-color:#806a3e}
+.read{font-size:11px;font-weight:700}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.chip.active{background:#15548c;border-color:#4097db}
+.sidebox{background:#0a1929;border:1px solid #263c54;border-radius:9px;padding:12px;margin-bottom:9px}
+.sidebox h4{font-size:12px;margin:0 0 6px;line-height:1.5}
+.sidebox p{font-size:10px;color:var(--muted);line-height:1.5;margin:0 0 7px}
+.sidebox a{font-size:10px;margin-right:9px}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;padding:22px;line-height:1.6}
+.sourcegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.source{background:#0a1929;border:1px solid #29415b;border-radius:9px;padding:12px}
+.source strong{font-size:12px;display:block;margin-bottom:5px}
+.source span{font-size:10px;color:var(--muted);display:block;line-height:1.5;min-height:31px}
+.source a{display:inline-block;margin-top:8px;font-size:10px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:500px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid #263c54}
+th{color:var(--muted);font-weight:600}
+input,select{background:#081827;color:var(--text);border:1px solid #35516e;border-radius:8px;padding:9px;font-size:11px;max-width:100%}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap}
+.searchrow input{flex:1;min-width:170px}
+.timeline{border-left:2px solid #365b7d;margin:12px 0 12px 8px;padding-left:16px}
+.timeitem{position:relative;padding:0 0 15px}
+.timeitem:before{content:"";position:absolute;left:-22px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--blue);border:2px solid #0d1b2c}
+.timeitem strong{font-size:11px}
+.timeitem p{font-size:11px;color:var(--muted);line-height:1.5;margin:4px 0}
+.quake{padding:8px 0;border-bottom:1px solid #263c54;font-size:11px;line-height:1.5}
+footer{border-top:1px solid var(--line);padding:20px;text-align:center;color:#7289a3;font-size:10px;line-height:1.7;margin-top:25px}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.sourcegrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){main{padding:14px 11px}.top{padding:11px}.topright{display:none}nav{padding:0 10px 10px}.hero{display:block}.hero .actions{margin-top:13px}.stats{grid-template-columns:repeat(2,1fr)}.feedgrid{grid-template-columns:1fr}.sourcegrid{grid-template-columns:1fr}#map{height:340px}}
 </style>
 </head>
 <body>
-<header><div class="top">
- <div class="brand"><div class="mark">◎</div><div><h1>WORLD RADAR</h1><div class="subtitle">GLOBAL CRISIS & INTELLIGENCE MONITOR</div></div></div>
- <div class="topright"><span><i class="live-dot"></i>VEILLE OUVERTE</span><span id="clock">--:--:-- UTC</span><span>ÉDITION FRANÇAISE</span></div>
-</div></header>
+<header>
+ <div class="top">
+  <div class="brand"><div class="logo">◎</div><div><h1>WORLD RADAR</h1><small>GLOBAL INTELLIGENCE & SITUATION MONITOR</small></div></div>
+  <div class="topright"><span><i class="live"></i>VEILLE OUVERTE</span><span id="clock">--:-- UTC</span></div>
+ </div>
+ <nav>
+  <a href="#briefing">Briefing</a><a href="#mapsection">Carte mondiale</a><a href="#news">Actualités</a><a href="#timeline">Chronologie</a><a href="#maritime">Maritime</a><a href="#economy">Économie</a><a href="#osint">OSINT</a><a href="#sources">Sources</a><a href="#favorites">Favoris</a>
+ </nav>
+</header>
 <main>
- <div class="hero"><div><div class="eyebrow">Centre de situation mondial / OSINT</div><h2>Comprendre. Surveiller. Relier.</h2><p>Un tableau de veille internationale : conflits, diplomatie, sécurité, économie, crises humanitaires, routes maritimes, cybermenaces et risques naturels. Chaque article renvoie vers sa source d’origine.</p></div><div class="actions"><button class="btn primary" id="refresh">↻ Actualiser les données</button><a class="btn" href="#sources">Explorer les sources ↗</a></div></div>
- <section class="gridstats">
-  <div class="stat"><small>Articles collectés</small><strong id="articleCount">—</strong><em>Flux international GDELT</em></div>
-  <div class="stat"><small>Alertes fortes</small><strong id="alertCount">—</strong><em>Classement automatique par mots-clés</em></div>
-  <div class="stat"><small>Séismes / 24 h</small><strong id="quakeCount">—</strong><em>Flux officiel USGS</em></div>
-  <div class="stat"><small>Dernière mise à jour</small><strong id="updated">—</strong><em id="dataState">Initialisation des flux</em></div>
+ <section class="hero">
+  <div><div class="eyebrow">Centre indépendant de veille en sources ouvertes</div><h2>Comprendre le monde en temps réel.</h2><p>Suivre les crises, relier les événements, observer les évolutions diplomatiques, économiques, humanitaires et stratégiques. Les publications restent accessibles depuis leurs sources originales.</p></div>
+  <div class="actions"><button class="btn primary" id="refresh">↻ Actualiser</button><button class="btn" id="printBrief">Imprimer le briefing</button></div>
+ </section>
+ <section class="stats">
+  <div class="stat"><small>Articles collectés</small><strong id="articleCount">—</strong><em>Index international</em></div>
+  <div class="stat"><small>Alertes prioritaires</small><strong id="alertCount">—</strong><em>Détection par mots-clés</em></div>
+  <div class="stat"><small>Séismes / 24 h</small><strong id="quakeCount">—</strong><em>Source USGS</em></div>
+  <div class="stat"><small>Indicateurs économiques</small><strong id="economicCount">—</strong><em>Banque mondiale</em></div>
+  <div class="stat"><small>Mise à jour</small><strong id="updated">—</strong><em id="dataState">Initialisation</em></div>
+ </section>
+ <section id="briefing" class="section panel">
+  <div class="panelhead"><div><div class="eyebrow">Synthèse automatique</div><h3>Briefing géopolitique du jour</h3></div><span class="muted" id="briefDate"></span></div>
+  <div class="status">Sélection calculée à partir des titres et de la fraîcheur des articles. Vérifie toujours les sources originales.</div>
+  <div id="briefingContent" class="feedgrid"><div class="empty">En attente des actualités.</div></div>
  </section>
  <div class="layout">
   <div>
-   <section class="panel">
-    <div class="panelhead"><div><div class="eyebrow">Géographie des événements</div><h3>Carte mondiale de situation</h3></div><div class="actions"><button class="btn" id="toggleQuakes">Séismes : ON</button><button class="btn" id="toggleMapNews">Articles géolocalisés : ON</button></div></div>
-    <div id="map"></div><div class="mapnote">Les marqueurs d’actualité sont des repères géographiques approximatifs lorsque le lieu est explicitement cité dans le titre. Ils ne représentent pas une position tactique ou une localisation vérifiée.</div>
+   <section id="mapsection" class="panel">
+    <div class="panelhead"><div><div class="eyebrow">Géographie des événements</div><h3>Carte mondiale de situation</h3></div><div class="actions"><button class="btn" id="toggleQuakes">Séismes : ON</button><button class="btn" id="toggleNews">Actualités : ON</button></div></div>
+    <div id="map"></div><p class="mapnote">Les repères d'actualité sont approximatifs et fondés sur les lieux cités dans les titres. Les points maritimes sont des passages stratégiques, pas des positions de navires.</p>
    </section>
-   <section class="panel">
-    <div class="feedhead"><div><div class="eyebrow">Flux internationaux</div><h3>Radar d’actualité</h3></div><span class="muted" id="resultInfo">En attente du flux…</span></div>
+   <section id="news" class="panel">
+    <div class="panelhead"><div><div class="eyebrow">Flux internationaux</div><h3>Radar d'actualité</h3></div><span class="muted" id="resultInfo">En attente…</span></div>
+    <div class="searchrow"><input id="searchNews" placeholder="Rechercher un pays, un sujet, un acteur…"><select id="sortNews"><option value="date">Plus récents</option><option value="priority">Priorité indicative</option></select></div>
     <div class="toolbar" id="filters">
      <button class="chip active" data-cat="all">Tout</button><button class="chip" data-cat="conflict">Conflits</button><button class="chip" data-cat="diplomacy">Diplomatie</button><button class="chip" data-cat="security">Sécurité</button><button class="chip" data-cat="politics">Politique</button><button class="chip" data-cat="economy">Économie</button><button class="chip" data-cat="humanitarian">Humanitaire</button><button class="chip" data-cat="maritime">Maritime</button><button class="chip" data-cat="cyber">Cyber</button><button class="chip" data-cat="environment">Risques naturels</button>
     </div>
     <div id="feedStatus" class="status">Connexion au flux international…</div>
-    <div id="stories" class="feedlist"><div class="empty">Les actualités vont apparaître ici.</div></div>
-    <div id="fallback" class="fallback"><div class="status warn">Mode de secours : affichage direct du flux GDELT. Les liens des titres restent accessibles même si le chargement automatique du tableau échoue.</div><iframe id="fallbackFrame" title="Flux international de secours" loading="lazy"></iframe></div>
+    <div id="stories" class="feedgrid"><div class="empty">Les actualités apparaîtront ici.</div></div>
+    <div id="fallback" class="status warn" hidden>Mode de secours : ouvre directement <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">GDELT</a> ou les sources institutionnelles.</div>
    </section>
   </div>
   <aside>
-   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Niveaux indicatifs</div><h3>Veille des alertes</h3></div></div><div class="muted">Le niveau est déduit automatiquement du vocabulaire des titres. Ce n’est ni une évaluation officielle ni une mesure du danger réel.</div>
-    <div id="alerts" style="margin-top:12px"><div class="empty">En attente des articles.</div></div>
-   </section>
-   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Activité tellurique</div><h3>Derniers séismes</h3></div><a class="read" href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener">Carte USGS ↗</a></div><div id="quakeStatus" class="status">Chargement USGS…</div><div id="earthquakeList"></div></section>
-   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Accès rapide</div><h3>Recherches par thème</h3></div></div><div id="quickSearch"></div></section>
+   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Surveillance</div><h3>Alertes prioritaires</h3></div></div><p class="muted">Niveaux indicatifs issus du vocabulaire des titres, pas des évaluations officielles de menace.</p><div id="alerts"></div></section>
+   <section class="panel"><div class="panelhead"><div><div class="eyebrow">Activité sismique</div><h3>Derniers séismes</h3></div><a class="read" href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank">USGS ↗</a></div><div id="quakeStatus" class="status">Chargement…</div><div id="earthquakeList"></div></section>
   </aside>
  </div>
- <section class="section" id="sources">
-  <div class="sectiontitle"><div><div class="eyebrow">Sources primaires et institutionnelles</div><h3>Accès direct aux organismes</h3><p class="muted">Portails officiels, communiqués, rapports et données. Les sites sources peuvent publier dans plusieurs langues.</p></div></div>
-  <div class="sources" id="sourceGrid"></div>
+  <section id="timeline" class="section panel">
+  <div class="sectiontitle"><div><div class="eyebrow">Suivi des événements</div><h3>Chronologie internationale</h3><p class="muted">Les événements sont classés selon la date de publication disponible.</p></div></div>
+  <div id="timelineContent" class="timeline"><div class="empty">En attente des événements.</div></div>
  </section>
+
+ <section id="maritime" class="section panel">
+  <div class="sectiontitle"><div><div class="eyebrow">Routes commerciales et sécurité</div><h3>Surveillance maritime stratégique</h3><p class="muted">Points de passage majeurs et accès aux données publiques.</p></div></div>
+  <div class="feedgrid" id="maritimeGrid"></div>
+  <div class="status warn">Cette rubrique présente des zones stratégiques et des liens de suivi. Elle ne fournit pas de positions AIS en direct. Le suivi des navires exige une source maritime spécialisée.</div>
+ </section>
+
+ <section id="economy" class="section panel">
+  <div class="sectiontitle"><div><div class="eyebrow">Indicateurs macroéconomiques</div><h3>Économie mondiale</h3><p class="muted">Indicateurs de développement publiés par la Banque mondiale. Les dernières années disponibles peuvent varier selon les pays.</p></div></div>
+  <div class="toolbar"><button class="chip active" data-econ="gdp">PIB</button><button class="chip" data-econ="inflation">Inflation</button><button class="chip" data-econ="energy">Énergie</button></div>
+  <div id="economicStatus" class="status">Chargement des indicateurs…</div>
+  <div class="tablewrap"><table><thead><tr><th>Pays</th><th>Indicateur</th><th>Dernière valeur</th><th>Année</th><th>Source</th></tr></thead><tbody id="economicTable"><tr><td colspan="5">Chargement…</td></tr></tbody></table></div>
+  <p class="muted">PIB : dollars US courants. Inflation : variation annuelle de l'indice des prix à la consommation. L'indicateur énergétique renvoie à des sources spécialisées plutôt qu'à une mesure temps réel.</p>
+ </section>
+
+ <section id="osint" class="section panel">
+  <div class="sectiontitle"><div><div class="eyebrow">Open Source Intelligence</div><h3>Boîte à outils OSINT</h3><p class="muted">Accès rapide aux ressources publiques pour vérifier, comparer et contextualiser une information.</p></div></div>
+  <div class="sourcegrid" id="osintGrid"></div>
+ </section>
+
+ <section id="sources" class="section panel">
+  <div class="sectiontitle"><div><div class="eyebrow">Sources primaires</div><h3>Organisations et institutions</h3><p class="muted">Portails officiels, rapports et communiqués.</p></div></div>
+  <div class="sourcegrid" id="sourceGrid"></div>
+ </section>
+
+ <section id="favorites" class="section panel">
+  <div class="sectiontitle"><div><div class="eyebrow">Espace personnel</div><h3>Événements sauvegardés</h3></div><button class="btn" id="clearFavorites">Effacer les favoris</button></div>
+  <p class="muted">Les favoris sont conservés sur cet appareil et dans ce navigateur.</p>
+  <div id="favoriteContent" class="feedgrid"><div class="empty">Aucun favori enregistré.</div></div>
+ </section>
+
  <section class="section panel">
-  <div class="sectiontitle"><div><div class="eyebrow">Transparence</div><h3>Sources, limites et méthode</h3></div></div>
-  <p class="muted">WORLD RADAR agrège des titres et liens publics. GDELT est un index médiatique mondial, pas une agence de vérification. Le classement thématique et les niveaux d’alerte sont calculés localement à partir des titres : ils peuvent se tromper. Les articles restent la propriété de leurs éditeurs et s’ouvrent sur les sites d’origine.</p>
-  <p class="muted">Le flux de secours utilise l’affichage HTML officiel de GDELT dans un cadre intégré. Si une API ou un réseau bloque l’accès, les portails institutionnels et les recherches thématiques restent accessibles. Un site statique GitHub Pages ne peut pas garantir la disponibilité de services externes ni contourner les blocages réseau.</p>
-  <p class="muted">Données sismiques : USGS. Fond cartographique : OpenStreetMap. Articles : GDELT et liens vers les éditeurs. Pas de volcano-monitoring.</p>
+  <div class="sectiontitle"><div><div class="eyebrow">Méthodologie</div><h3>Comprendre les données</h3></div></div>
+  <p class="muted">WORLD RADAR est un outil indépendant de veille en sources ouvertes. Les articles sont indexés par GDELT. Leur classement thématique et leur niveau de priorité sont calculés automatiquement à partir de mots-clés : ils peuvent être imparfaits. Les données sismiques proviennent de l'USGS et les indicateurs macroéconomiques de la Banque mondiale.</p>
+  <p class="muted">Une actualité indexée ne constitue pas une information vérifiée. Il faut recouper les sources, distinguer les faits confirmés des déclarations et tenir compte de la date de publication. Les marqueurs cartographiques sont des repères approximatifs. Les points maritimes sont des lieux géographiques stratégiques, pas des trajectoires de navires.</p>
+  <p class="muted">Le site dépend de services externes. Une panne, un blocage CORS, une limite d'accès ou une modification d'API peut empêcher l'affichage automatique. Les liens directs vers les organismes restent disponibles indépendamment du flux.</p>
  </section>
 </main>
-<footer>WORLD RADAR · GLOBAL CRISIS & INTELLIGENCE MONITOR<br>Outil indépendant de veille en sources ouvertes — ne constitue pas une source officielle de renseignement.</footer>
+<footer>WORLD RADAR · GLOBAL INTELLIGENCE & SITUATION MONITOR<br>Veille en sources ouvertes · Vérifier les informations auprès des sources originales · Ne constitue pas un service officiel de renseignement.</footer>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 "use strict";
+
 const $=id=>document.getElementById(id);
 const GDELT="https://api.gdeltproject.org/api/v2/doc/doc";
 const USGS="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+const WB="https://api.worldbank.org/v2";
 const TOPIC_QUERY='(war OR warfare OR conflict OR invasion OR airstrike OR missile OR diplomacy OR diplomatic OR negotiation OR summit OR sanctions OR security OR terrorism OR attack OR election OR government OR parliament OR economy OR energy OR oil OR trade OR humanitarian OR refugee OR famine OR aid OR shipping OR maritime OR naval OR cyber OR ransomware OR earthquake OR flood OR wildfire OR guerre OR conflit OR invasion OR diplomatie OR négociation OR sommet OR sanctions OR sécurité OR attentat OR attaque OR élections OR gouvernement OR économie OR énergie OR pétrole OR commerce OR humanitaire OR réfugiés OR famine OR maritime OR cyber OR séisme OR inondation)';
+
 const CATS={
- conflict:{label:"Conflits",terms:/war|warfare|conflict|invasion|airstrike|missile|bombard|military operation|armed forces|fighting|clash|guerre|conflit|invasion|frappe|missile|bombard|armée|militaire|combats|affrontements/i},
- diplomacy:{label:"Diplomatie",terms:/diplomac|negotiat|peace talks|summit|treaty|embassy|foreign minister|bilateral|diplomatie|négociation|pourparler|sommet|traité|ambassade|ministre des affaires étrangères|accord de paix/i},
+ conflict:{label:"Conflits",terms:/war|warfare|conflict|invasion|airstrike|missile|bombard|military|fighting|clash|guerre|conflit|invasion|frappe|missile|bombard|armée|militaire|combats|affrontements/i},
+ diplomacy:{label:"Diplomatie",terms:/diplomac|negotiat|peace talks|summit|treaty|embassy|foreign minister|bilateral|diplomatie|négociation|pourparler|sommet|traité|ambassade|accord de paix/i},
  security:{label:"Sécurité",terms:/security|terror|attack|explosion|hostage|border|insurg|police|intelligence|sécurité|terror|attentat|attaque|explosion|otage|frontière|insurrection|renseignement/i},
  politics:{label:"Politique",terms:/election|government|parliament|president|minister|protest|coup|political crisis|élection|gouvernement|parlement|président|ministre|manifestation|coup d'état|crise politique/i},
- economy:{label:"Économie",terms:/econom|market|trade|tariff|sanction|oil|gas|energy|inflation|currency|econom|marché|commerce|droit de douane|pétrole|gaz|énergie|inflation|monnaie/i},
+ economy:{label:"Économie",terms:/econom|market|trade|tariff|sanction|oil|gas|energy|inflation|currency|économie|marché|commerce|douane|pétrole|gaz|énergie|inflation|monnaie/i},
  humanitarian:{label:"Humanitaire",terms:/humanitarian|refugee|displaced|famine|food crisis|aid convoy|relief|humanitaire|réfugié|déplacé|famine|crise alimentaire|aide d'urgence/i},
  maritime:{label:"Maritime",terms:/maritime|shipping|vessel|ship|naval|strait|red sea|hormuz|piracy|port|mer rouge|détroit|navire|marine|piraterie|portuaire/i},
  cyber:{label:"Cyber",terms:/cyber|ransomware|hack|hacker|data breach|malware|phishing|cyberattaque|piratage|rançongiciel|fuite de données|logiciel malveillant/i},
  environment:{label:"Risques naturels",terms:/earthquake|quake|flood|wildfire|hurricane|cyclone|storm|drought|landslide|séisme|inondation|incendie|ouragan|cyclone|tempête|sécheresse|glissement de terrain/i}
 };
+
 const SOURCES=[
- ["ONU / UN News","Actualités, déclarations et couverture des réunions internationales.","https://news.un.org/fr/"],
- ["Conseil de sécurité ONU","Résolutions, réunions, sanctions et communiqués officiels.","https://www.un.org/securitycouncil/"],
- ["ONU Genève","Droits humains, désarmement, aide et actualités internationales.","https://www.ungeneva.org/fr/news-media"],
- ["Conseil de l’Union européenne","Diplomatie, affaires étrangères, sanctions et décisions.","https://www.consilium.europa.eu/fr/press/press-releases/"],
- ["Service européen pour l’action extérieure","Déclarations diplomatiques et politique étrangère de l’UE.","https://www.eeas.europa.eu/"],
- ["OTAN","Communiqués, opérations, exercices et sécurité euro-atlantique.","https://www.nato.int/cps/fr/natohq/news.htm"],
- ["ReliefWeb / OCHA","Rapports humanitaires, urgences, déplacements et cartes.","https://reliefweb.int/"],
+ ["ONU — UN News","Actualités et couverture des réunions internationales.","https://news.un.org/fr/"],
+ ["Conseil de sécurité ONU","Résolutions, réunions, sanctions et communiqués.","https://www.un.org/securitycouncil/"],
+ ["ONU Genève","Droits humains, désarmement et aide humanitaire.","https://www.ungeneva.org/fr/news-media"],
+ ["Conseil de l'UE","Diplomatie, affaires étrangères et sanctions.","https://www.consilium.europa.eu/fr/press/"],
+ ["Service européen pour l'action extérieure","Déclarations diplomatiques et politique étrangère européenne.","https://www.eeas.europa.eu/"],
+ ["OTAN","Communiqués et actualités de sécurité euro-atlantique.","https://www.nato.int/cps/fr/natohq/news.htm"],
+ ["ReliefWeb / OCHA","Rapports et situations humanitaires.","https://reliefweb.int/"],
  ["ACLED","Données et analyses sur les conflits et violences politiques.","https://acleddata.com/"],
- ["USGS Earthquake Hazards","Données sismiques mondiales en temps réel.","https://earthquake.usgs.gov/earthquakes/map/"],
- ["Banque mondiale","Économie, développement, commerce et rapports pays.","https://www.worldbank.org/en/news"],
- ["Fonds monétaire international","Stabilité financière, économie mondiale et analyses.","https://www.imf.org/en/News"],
- ["Agence internationale de l’énergie","Énergie, pétrole, gaz et sécurité énergétique.","https://www.iea.org/news"],
- ["Organisation maritime internationale","Sécurité maritime, navigation et réglementation.","https://www.imo.org/en/MediaCentre/Pages/Default.aspx"],
- ["CISA — Cybersecurity","Alertes et avis techniques de cybersécurité.","https://www.cisa.gov/news-events/cybersecurity-advisories"],
- ["Centre de situation maritime UE","Politique et sécurité maritime européennes.","https://www.eeas.europa.eu/eeas/maritime-security_en"],
- ["GDELT Project","Index mondial d’articles et de médias, multilingue.","https://www.gdeltproject.org/"]
+ ["USGS","Données sismiques mondiales.","https://earthquake.usgs.gov/earthquakes/map/"],
+ ["Banque mondiale","Économie, développement et indicateurs pays.","https://www.worldbank.org/en/news"],
+ ["FMI","Stabilité financière et économie mondiale.","https://www.imf.org/en/News"],
+ ["Agence internationale de l'énergie","Énergie, pétrole, gaz et analyses de marché.","https://www.iea.org/news"],
+ ["Organisation maritime internationale","Sécurité maritime et navigation.","https://www.imo.org/en/MediaCentre/Pages/Default.aspx"],
+ ["CISA","Alertes et avis de cybersécurité.","https://www.cisa.gov/news-events/cybersecurity-advisories"],
+ ["GDELT Project","Index mondial de publications médiatiques.","https://www.gdeltproject.org/"]
 ];
-const SEARCHES=[
- ["Conflits armés","war OR armed conflict OR fighting OR invasion"],
- ["Diplomatie","diplomacy OR negotiations OR summit OR peace talks"],
- ["Sécurité","terrorism OR security OR attack OR border tensions"],
- ["Politique","elections OR government OR parliament OR political crisis"],
- ["Économie & énergie","economy OR oil OR gas OR energy OR sanctions"],
- ["Crises humanitaires","humanitarian OR refugees OR famine OR displacement"],
- ["Maritime","shipping OR naval OR Red Sea OR Strait of Hormuz"],
- ["Cyber","cyberattack OR ransomware OR hacking OR data breach"]
+
+const OSINT=[
+ ["GDELT","Index international d'articles et de médias.","https://www.gdeltproject.org/"],
+ ["Google Actualités","Comparer les publications sur un même événement.","https://news.google.com/"],
+ ["Bellingcat","Enquêtes et méthodes OSINT en sources ouvertes.","https://www.bellingcat.com/"],
+ ["Liveuamap","Carte d'événements et d'actualités géolocalisées.","https://liveuamap.com/"],
+ ["MarineTraffic","Suivi maritime et informations AIS selon disponibilité.","https://www.marinetraffic.com/"],
+ ["VesselFinder","Informations et suivi de navires selon disponibilité.","https://www.vesselfinder.com/"],
+ ["NASA FIRMS","Détection satellitaire des anomalies thermiques et incendies.","https://firms.modaps.eosdis.nasa.gov/"],
+ ["Copernicus","Observation de la Terre et données environnementales.","https://www.copernicus.eu/"],
+ ["ReliefWeb","Rapports humanitaires et cartes de situation.","https://reliefweb.int/"],
+ ["Our World in Data","Données et graphiques sur les grands enjeux mondiaux.","https://ourworldindata.org/"],
+ ["World Bank Data","Indicateurs économiques et sociaux par pays.","https://data.worldbank.org/"],
+ ["OpenStreetMap","Cartographie collaborative mondiale.","https://www.openstreetmap.org/"]
 ];
- let articles=[],activeCat="all",quakes=[],mapObj=null,quakeLayer=null,newsLayer=null,showQuakes=true,showNews=true;
 
-function domain(url){try{return new URL(url).hostname.replace(/^www\./,"")}catch{return "Source"}}
-
-function fmtDate(raw){
- if(!raw)return "Date non précisée";
- if(/^\d{14}$/.test(String(raw))){
-  const s=String(raw);
-  return new Date(Date.UTC(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8),+s.slice(8,10),+s.slice(10,12),+s.slice(12,14))).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short",timeZone:"UTC"})+" UTC";
- }
- const d=new Date(raw);
- return isNaN(d)?"Date non précisée":d.toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"});
-}
-
-function classify(a){
- const t=(a.title||"")+" "+(a.domain||"");
- for(const [key,v] of Object.entries(CATS)){
-  if(v.terms.test(t))return key;
- }
- return "politics";
-}
-
-function severity(title){
- const t=String(title||"").toLowerCase();
- if(/nuclear strike|declaration of war|invasion begins|coup d'état|attaque nucléaire|déclaration de guerre|invasion terrestre|coup d'état/.test(t))return 3;
- if(/airstrike|missile|bombing|massacre|terrorist attack|offensive|frappe|missile|bombardement|massacre|attentat|offensive|combats/.test(t))return 2;
- if(/tension|sanction|mobilisation|crisis|alert|tensions|sanction|mobilisation|crise|alerte/.test(t))return 1;
- return 0;
-}
-
-function setStatus(message,kind=""){
- const el=$("feedStatus");
- el.className="status "+kind;
- el.textContent=message;
-}
-
-function buildGdeltUrl(format="json",query=TOPIC_QUERY){
- const p=new URLSearchParams({
-  query,mode:"ArtList",format,maxrecords:"250",timespan:"7d",sort:"DateDesc"
- });
- return GDELT+"?"+p.toString();
-}
-
-async function fetchWithTimeout(url,ms=18000){
- const controller=new AbortController();
- const timer=setTimeout(()=>controller.abort(),ms);
- try{
-  return await fetch(url,{
-   signal:controller.signal,
-   cache:"no-store",
-   headers:{Accept:"application/json"}
-  });
- }finally{
-  clearTimeout(timer);
- }
-}
-
-async function loadNews(){
- const button=$("refresh");
- button.disabled=true;
- button.textContent="Collecte…";
- setStatus("Interrogation du flux mondial GDELT…");
-
- try{
-  const res=await fetchWithTimeout(buildGdeltUrl(),20000);
-  if(!res.ok)throw new Error("Réponse HTTP "+res.status);
-
-  const raw=await res.text();
-  let data;
-  try{data=JSON.parse(raw)}
-  catch{throw new Error("La source n’a pas renvoyé de JSON exploitable");}
-
-  if(!Array.isArray(data.articles))
-   throw new Error("Format de réponse inattendu");
-
-  const seen=new Set();
-  articles=data.articles
-   .filter(a=>a&&a.title&&a.url&&!seen.has(a.url)&&(seen.add(a.url),true))
-   .map(a=>({...a,_cat:classify(a),_severity:severity(a.title)}));
-
-  articles.sort((a,b)=>String(b.seendate||"").localeCompare(String(a.seendate||"")));
-
-  $("articleCount").textContent=articles.length;
-  $("alertCount").textContent=articles.filter(a=>a._severity>=2).length;
-  $("updated").textContent=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
-  $("dataState").textContent="GDELT · 7 derniers jours";
-  $("resultInfo").textContent=articles.length+" articles reçus";
-
-  setStatus(
-   articles.length
-    ?"Flux reçu. Les titres sont classés localement ; ouvre « Lire la source » pour consulter chaque publication originale."
-    :"Le flux a répondu mais aucun article n’a été retourné.",
-   articles.length?"good":"warn"
-  );
-
-  renderStories();
-  renderAlerts();
-  renderMarkers();
-  $("fallback").classList.remove("visible");
-
- }catch(err){
-  console.error(err);
-  setStatus(
-   "Le flux automatique est indisponible ("+
-   (err.name==="AbortError"?"délai dépassé":err.message)+
-   "). Le mode de secours et les portails officiels restent accessibles ci-dessous.",
-   "error"
-  );
-
-  $("dataState").textContent="Mode de secours";
-  $("fallback").classList.add("visible");
-  $("fallbackFrame").src=buildGdeltUrl("html");
-
-  if(!articles.length){
-   $("stories").innerHTML='<div class="empty">Le service automatique ne répond pas pour le moment. Le flux de secours ci-dessous et les liens institutionnels restent utilisables.</div>';
-  }
-
- }finally{
-  button.disabled=false;
-  button.textContent="↻ Actualiser les données";
- }
-}
-
-function renderStories(){
- const box=$("stories");
- box.replaceChildren();
-
- const list=articles
-  .filter(a=>activeCat==="all"||a._cat===activeCat)
-  .slice(0,100);
-
- if(!list.length){
-  box.innerHTML='<div class="empty">Aucun article dans cette rubrique pour le moment. Essaie « Tout » ou ouvre la recherche thématique.</div>';
-  return;
- }
-
- list.forEach(a=>{
-  const card=document.createElement("article");
-  card.className="story";
-
-  const title=document.createElement("h4");
-  title.textContent=a.title;
-
-  const meta=document.createElement("div");
-  meta.className="meta";
-  meta.textContent=domain(a.url)+" · "+fmtDate(a.seendate);
-
-  const foot=document.createElement("div");
-  foot.className="storyfoot";
-
-  const tag=document.createElement("span");
-  tag.className="tag "+a._cat;
-  tag.textContent=CATS[a._cat]?.label||"Actualité";
-
-  const link=document.createElement("a");
-  link.className="read";
-  link.href=a.url;
-  link.target="_blank";
-  link.rel="noopener noreferrer";
-  link.textContent="Lire la source ↗";
-
-  foot.append(tag,link);
-  card.append(meta,title,foot);
-  box.append(card);
- });
-}
-
-function renderAlerts(){
- const box=$("alerts");
- box.replaceChildren();
-
- const high=articles
-  .filter(a=>a._severity>0)
-  .sort((a,b)=>b._severity-a._severity)
-  .slice(0,8);
-
- if(!high.length){
-  box.innerHTML='<div class="empty">Aucune alerte prioritaire détectée dans les titres reçus.</div>';
-  return;
- }
-
- high.forEach(a=>{
-  const d=document.createElement("div");
-  d.className="sidebox";
-
-  const h=document.createElement("h4");
-  h.textContent=
-   (a._severity===3?"● CRITIQUE":a._severity===2?"● ÉLEVÉ":"● À SURVEILLER")
-   +" — "+a.title;
-
-  const p=document.createElement("p");
-  p.textContent=domain(a.url)+" · "+fmtDate(a.seendate);
-
-  const l=document.createElement("a");
-  l.href=a.url;
-  l.target="_blank";
-  l.rel="noopener noreferrer";
-  l.textContent="Ouvrir la publication ↗";
-
-  d.append(h,p,l);
-  box.append(d);
- });
-}
+const MARITIME=[
+ {name:"Détroit d'Ormuz",desc:"Passage stratégique pour les exportations d'hydrocarbures du Golfe.",lat:26.56,lon:56.25,links:[["Carte","https://www.openstreetmap.org/#map=8/26.56/56.25"],["Actualités","https://news.google.com/search?q=Strait%20of%20Hormuz"]]},
+ {name:"Canal de Suez",desc:"Corridor majeur entre Méditerranée et mer Rouge.",lat:30.45,lon:32.35,links:[["Carte","https://www.openstreetmap.org/#map=8/30.45/32.35"],["Actualités","https://news.google.com/search?q=Suez%20Canal"]]},
+ {name:"Bab el-Mandeb",desc:"Passage entre mer Rouge et golfe d'Aden.",lat:12.58,lon:43.33,links:[["Carte","https://www.openstreetmap.org/#map=8/12.58/43.33"],["Actualités","https://news.google.com/search?q=Bab%20el-Mandeb"]]},
+ {name:"Détroit de Malacca",desc:"Route commerciale majeure d'Asie du Sud-Est.",lat:2.5,lon:101.5,links:[["Carte","https://www.openstreetmap.org/#map=6/2.5/101.5"],["Actualités","https://news.google.com/search?q=Strait%20of%20Malacca"]]},
+ {name:"Canal de Panama",desc:"Lien maritime entre Atlantique et Pacifique.",lat:9.08,lon:-79.68,links:[["Carte","https://www.openstreetmap.org/#map=8/9.08/-79.68"],["Actualités","https://news.google.com/search?q=Panama%20Canal"]]},
+ {name:"Mer Noire",desc:"Zone stratégique pour les exportations et la sécurité régionale.",lat:43.5,lon:34.5,links:[["Carte","https://www.openstreetmap.org/#map=5/43.5/34.5"],["Actualités","https://news.google.com/search?q=Black%20Sea%20shipping"]]}
+];
 
 const PLACES=[
  [["kyiv","kiev"],"Kyiv",50.45,30.52],
@@ -351,18 +279,394 @@ const PLACES=[
  [["russia","russie"],"Russie",61.52,105.32],
  [["iran"],"Iran",32.43,53.69],
  [["red sea","mer rouge"],"Mer Rouge",20,38],
- [["strait of hormuz","détroit d'ormuz"],"Détroit d'Ormuz",26.5,56.5],
  [["paris"],"Paris",48.86,2.35],
  [["washington"],"Washington",38.91,-77.04]
 ];
 
-function initMap(){
- if(!window.L){
-  $("map").innerHTML='<div class="empty">La bibliothèque cartographique ne s’est pas chargée. Les cartes restent accessibles sur <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a>.</div>';
+let articles=[];
+let quakes=[];
+let activeCat="all";
+let showQuakes=true,showNews=true;
+let mapObj=null,quakeLayer=null,newsLayer=null,maritimeLayer=null;
+let econMode="gdp";
+let favorites=JSON.parse(localStorage.getItem("wr_favorites")||"[]");
+ function domain(url){
+ try{return new URL(url).hostname.replace(/^www\./,"")}
+ catch{return "Source inconnue"}
+}
+
+function formatDate(raw){
+ if(!raw)return "Date non précisée";
+ if(/^\d{14}$/.test(String(raw))){
+  const s=String(raw);
+  return new Date(Date.UTC(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8),+s.slice(8,10),+s.slice(10,12),+s.slice(12,14))).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short",timeZone:"UTC"})+" UTC";
+ }
+ const d=new Date(raw);
+ return isNaN(d)?"Date non précisée":d.toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"});
+}
+
+function classify(a){
+ const t=(a.title||"")+" "+(a.domain||"");
+ for(const [key,c] of Object.entries(CATS)){
+  if(c.terms.test(t))return key;
+ }
+ return "politics";
+}
+
+function priority(title){
+ const t=String(title||"").toLowerCase();
+ if(/nuclear strike|declaration of war|invasion begins|coup d'état|attaque nucléaire|déclaration de guerre|invasion terrestre/.test(t))return 3;
+ if(/airstrike|missile|bombing|massacre|terrorist attack|offensive|frappe|missile|bombardement|massacre|attentat|offensive/.test(t))return 2;
+ if(/tension|sanction|mobilisation|crisis|alert|tensions|sanction|mobilisation|crise|alerte/.test(t))return 1;
+ return 0;
+}
+
+function status(id,msg,kind=""){
+ const el=$(id);
+ if(!el)return;
+ el.className="status "+kind;
+ el.textContent=msg;
+}
+
+function gdeltUrl(format="json",query=TOPIC_QUERY){
+ const p=new URLSearchParams({
+  query,mode:"ArtList",format,maxrecords:"250",timespan:"7d",sort:"DateDesc"
+ });
+ return GDELT+"?"+p.toString();
+}
+
+async function fetchTimeout(url,ms=18000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),ms);
+ try{
+  const response=await fetch(url,{signal:controller.signal,cache:"no-store"});
+  return response;
+ }finally{
+  clearTimeout(timer);
+ }
+}
+
+function addLink(parent,url,label){
+ const a=document.createElement("a");
+ a.href=url;
+ a.target="_blank";
+ a.rel="noopener noreferrer";
+ a.textContent=label;
+ parent.append(a);
+}
+
+async function loadNews(){
+ const button=$("refresh");
+ button.disabled=true;
+ button.textContent="Collecte…";
+ status("feedStatus","Interrogation du flux international GDELT…");
+
+ try{
+  const r=await fetchTimeout(gdeltUrl(),20000);
+  if(!r.ok)throw new Error("Réponse HTTP "+r.status);
+
+  const raw=await r.text();
+  let data;
+  try{data=JSON.parse(raw)}
+  catch{throw new Error("Réponse non JSON");}
+
+  if(!Array.isArray(data.articles))throw new Error("Format d'articles inattendu");
+
+  const seen=new Set();
+  articles=data.articles.filter(a=>{
+   if(!a||!a.title||!a.url||seen.has(a.url))return false;
+   seen.add(a.url);
+   return true;
+  }).map(a=>({
+   ...a,
+   _cat:classify(a),
+   _priority:priority(a.title)
+  }));
+
+  articles.sort((a,b)=>String(b.seendate||"").localeCompare(String(a.seendate||"")));
+
+  $("articleCount").textContent=articles.length;
+  $("alertCount").textContent=articles.filter(a=>a._priority>=2).length;
+  $("updated").textContent=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  $("dataState").textContent="GDELT · 7 jours";
+  $("resultInfo").textContent=articles.length+" articles reçus";
+
+  status("feedStatus",articles.length
+   ?"Flux reçu. Les titres sont classés automatiquement. Consulte les sources originales pour vérifier les informations."
+   :"Le flux a répondu, mais aucun article n'a été retourné.",
+   articles.length?"good":"warn");
+
+  $("fallback").hidden=true;
+
+  renderStories();
+  renderBriefing();
+  renderAlerts();
+  renderTimeline();
+  renderMarkers();
+
+ }catch(e){
+  console.error("GDELT:",e);
+  status("feedStatus","Flux automatique indisponible : "+(e.name==="AbortError"?"délai dépassé":e.message)+". Les accès directs restent disponibles.","error");
+  $("dataState").textContent="Flux indisponible";
+  $("fallback").hidden=false;
+
+  if(!articles.length){
+   $("stories").innerHTML='<div class="empty">Aucun article n’a pu être chargé automatiquement. Consulte les portails institutionnels et les recherches externes.</div>';
+   $("briefingContent").innerHTML='<div class="empty">Briefing impossible sans articles reçus. Les liens de sources restent accessibles.</div>';
+  }
+ }finally{
+  button.disabled=false;
+  button.textContent="↻ Actualiser";
+ }
+}
+
+function makeStory(a,withSave=true){
+ const card=document.createElement("article");
+ card.className="story";
+
+ const meta=document.createElement("div");
+ meta.className="meta";
+ meta.textContent=domain(a.url)+" · "+formatDate(a.seendate);
+
+ const title=document.createElement("h4");
+ title.textContent=a.title;
+
+ const foot=document.createElement("div");
+ foot.className="storyfoot";
+
+ const tag=document.createElement("span");
+ tag.className="tag "+a._cat;
+ tag.textContent=CATS[a._cat]?.label||"Actualité";
+
+ const actions=document.createElement("div");
+ actions.style.display="flex";
+ actions.style.gap="10px";
+ actions.style.alignItems="center";
+
+ const link=document.createElement("a");
+ link.className="read";
+ link.href=a.url;
+ link.target="_blank";
+ link.rel="noopener noreferrer";
+ link.textContent="Source ↗";
+ actions.append(link);
+
+ if(withSave){
+  const save=document.createElement("button");
+  save.className="chip";
+  save.textContent=favorites.some(f=>f.url===a.url)?"★":"☆";
+  save.title="Ajouter aux favoris";
+  save.addEventListener("click",()=>toggleFavorite(a));
+  actions.append(save);
+ }
+
+ foot.append(tag,actions);
+ card.append(meta,title,foot);
+ return card;
+}
+
+function renderStories(){
+ const box=$("stories");
+ box.replaceChildren();
+
+ const q=$("searchNews").value.trim().toLowerCase();
+ let list=articles.filter(a=>
+  (activeCat==="all"||a._cat===activeCat)&&
+  (!q||(a.title+" "+(a.domain||"")).toLowerCase().includes(q))
+ );
+
+ if($("sortNews").value==="priority"){
+  list.sort((a,b)=>b._priority-a._priority||String(b.seendate).localeCompare(String(a.seendate)));
+ }else{
+  list.sort((a,b)=>String(b.seendate).localeCompare(String(a.seendate)));
+ }
+
+ $("resultInfo").textContent=list.length+" résultat(s)";
+ list.slice(0,100).forEach(a=>box.append(makeStory(a)));
+
+ if(!list.length){
+  box.innerHTML='<div class="empty">Aucun résultat. Essaie une autre recherche ou une autre catégorie.</div>';
+ }
+}
+
+function renderBriefing(){
+ const box=$("briefingContent");
+ box.replaceChildren();
+
+ $("briefDate").textContent=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+
+ if(!articles.length){
+  box.innerHTML='<div class="empty">Pas de données reçues pour construire le briefing.</div>';
   return;
  }
 
- mapObj=L.map("map",{worldCopyJump:true}).setView([20,0],2);
+ const selected=articles.slice().sort((a,b)=>{
+  const freshness=(x)=>Date.parse(String(x.seendate||"").replace(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/,"$1-$2-$3T$4:$5:$6Z"))||0;
+  return (b._priority-a._priority)||(freshness(b)-freshness(a));
+ }).slice(0,5);
+
+ selected.forEach((a,i)=>{
+  const card=makeStory(a);
+  const heading=document.createElement("div");
+  heading.className="eyebrow";
+  heading.textContent="ÉVÉNEMENT "+String(i+1).padStart(2,"0");
+  card.prepend(heading);
+  box.append(card);
+ });
+}
+
+function renderAlerts(){
+ const box=$("alerts");
+ box.replaceChildren();
+
+ const list=articles.filter(a=>a._priority>0)
+  .sort((a,b)=>b._priority-a._priority)
+  .slice(0,8);
+
+ if(!list.length){
+  box.innerHTML='<div class="empty">Aucune alerte prioritaire détectée dans les titres disponibles.</div>';
+  return;
+ }
+
+ list.forEach(a=>{
+  const d=document.createElement("div");
+  d.className="sidebox";
+
+  const h=document.createElement("h4");
+  h.textContent=(a._priority===3?"● PRIORITÉ TRÈS ÉLEVÉE":a._priority===2?"● PRIORITÉ ÉLEVÉE":"● À SURVEILLER")+" — "+a.title;
+
+  const p=document.createElement("p");
+  p.textContent=domain(a.url)+" · "+formatDate(a.seendate);
+
+  d.append(h,p);
+  addLink(d,a.url,"Consulter la source ↗");
+  box.append(d);
+ });
+}
+
+function renderTimeline(){
+ const box=$("timelineContent");
+ box.replaceChildren();
+
+ const list=articles.slice().sort((a,b)=>String(b.seendate||"").localeCompare(String(a.seendate||""))).slice(0,30);
+
+ if(!list.length){
+  box.innerHTML='<div class="empty">Aucun événement disponible.</div>';
+  return;
+ }
+
+ list.forEach(a=>{
+  const item=document.createElement("div");
+  item.className="timeitem";
+
+  const date=document.createElement("strong");
+  date.textContent=formatDate(a.seendate);
+
+  const p=document.createElement("p");
+  p.textContent=a.title;
+
+  const tag=document.createElement("span");
+  tag.className="tag "+a._cat;
+  tag.textContent=CATS[a._cat]?.label||"Actualité";
+
+  item.append(date,p,tag);
+  item.append(document.createTextNode(" "));
+  addLink(item,a.url,"Source ↗");
+  box.append(item);
+ });
+}
+
+function toggleFavorite(a){
+ const found=favorites.some(f=>f.url===a.url);
+
+ if(found){
+  favorites=favorites.filter(f=>f.url!==a.url);
+ }else{
+  favorites.unshift({
+   title:a.title,url:a.url,domain:a.domain||domain(a.url),
+   seendate:a.seendate,_cat:a._cat
+  });
+ }
+
+ localStorage.setItem("wr_favorites",JSON.stringify(favorites));
+ renderFavorites();
+ renderStories();
+ renderBriefing();
+}
+
+function renderFavorites(){
+ const box=$("favoriteContent");
+ box.replaceChildren();
+
+ if(!favorites.length){
+  box.innerHTML='<div class="empty">Aucun favori enregistré.</div>';
+  return;
+ }
+
+ favorites.forEach(a=>{
+  const item=makeStory(a,false);
+  const remove=document.createElement("button");
+  remove.className="chip";
+  remove.textContent="Retirer ★";
+  remove.addEventListener("click",()=>{
+   favorites=favorites.filter(f=>f.url!==a.url);
+   localStorage.setItem("wr_favorites",JSON.stringify(favorites));
+   renderFavorites();
+   renderStories();
+  });
+  item.append(remove);
+  box.append(item);
+ });
+}
+
+$("clearFavorites").addEventListener("click",()=>{
+ if(!confirm("Effacer tous les favoris enregistrés sur cet appareil ?"))return;
+ favorites=[];
+ localStorage.setItem("wr_favorites","[]");
+ renderFavorites();
+});
+
+$("searchNews").addEventListener("input",renderStories);
+$("sortNews").addEventListener("change",renderStories);
+
+$("filters").addEventListener("click",e=>{
+ const b=e.target.closest("button[data-cat]");
+ if(!b)return;
+ activeCat=b.dataset.cat;
+ document.querySelectorAll("#filters .chip").forEach(x=>x.classList.toggle("active",x===b));
+ renderStories();
+});
+
+$("printBrief").addEventListener("click",()=>window.print());
+ function renderCards(containerId,data){
+ const box=$(containerId);
+ box.replaceChildren();
+
+ data.forEach(s=>{
+  const d=document.createElement("div");
+  d.className="source";
+
+  const h=document.createElement("strong");
+  h.textContent=s[0];
+
+  const p=document.createElement("span");
+  p.textContent=s[1];
+
+  d.append(h,p);
+
+  (s[2]||[]).forEach(l=>addLink(d,l[1],l[0]+" ↗"));
+
+  box.append(d);
+ });
+}
+
+function initMap(){
+ if(!window.L){
+  $("map").innerHTML='<div class="empty">La bibliothèque cartographique ne s’est pas chargée. Consulte <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a>.</div>';
+  return;
+ }
+
+ mapObj=L.map("map",{worldCopyJump:true}).setView([22,10],2);
 
  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
   maxZoom:18,
@@ -371,31 +675,55 @@ function initMap(){
 
  quakeLayer=L.layerGroup().addTo(mapObj);
  newsLayer=L.layerGroup().addTo(mapObj);
-}
+ maritimeLayer=L.layerGroup().addTo(mapObj);
 
-function renderMarkers(){
- if(!newsLayer)return;
- newsLayer.clearLayers();
- if(!showNews)return;
-
- const done=new Set();
-
- articles.slice(0,100).forEach(a=>{
-  const t=(a.title||"").toLowerCase();
-  const p=PLACES.find(x=>x[0].some(n=>t.includes(n)));
-
-  if(!p||done.has(p[1]))return;
-  done.add(p[1]);
-
-  const m=L.circleMarker([p[2],p[3]],{
-   radius:7,
-   color:"#fff",
-   weight:1,
-   fillColor:"#4ba3ff",
-   fillOpacity:.9
+ MARITIME.forEach(p=>{
+  const marker=L.circleMarker([p.lat,p.lon],{
+   radius:6,color:"#8fe5e8",fillColor:"#1aa9b2",fillOpacity:.9,weight:1
   });
 
   const pop=document.createElement("div");
+  const strong=document.createElement("strong");
+  strong.textContent=p.name;
+
+  const desc=document.createElement("p");
+  desc.textContent=p.desc;
+  pop.append(strong,desc);
+
+  p.links.forEach(l=>{
+   const a=document.createElement("a");
+   a.href=l[1];
+   a.target="_blank";
+   a.rel="noopener noreferrer";
+   a.textContent=l[0]+" ↗";
+   a.style.marginRight="10px";
+   pop.append(a);
+  });
+
+  marker.bindPopup(pop);
+  maritimeLayer.addLayer(marker);
+ });
+}
+
+function renderMarkers(){
+ if(!newsLayer||!window.L)return;
+ newsLayer.clearLayers();
+ if(!showNews)return;
+
+ const used=new Set();
+
+ articles.slice(0,120).forEach(a=>{
+  const title=(a.title||"").toLowerCase();
+  const place=PLACES.find(p=>p[0].some(n=>title.includes(n)));
+
+  if(!place||used.has(place[1]))return;
+  used.add(place[1]);
+
+  const marker=L.circleMarker([place[2],place[3]],{
+   radius:7,color:"#fff",weight:1,fillColor:"#4ba3ff",fillOpacity:.9
+  });
+
+  const popup=document.createElement("div");
   const strong=document.createElement("strong");
   strong.textContent=a.title;
 
@@ -403,67 +731,16 @@ function renderMarkers(){
   link.href=a.url;
   link.target="_blank";
   link.rel="noopener noreferrer";
-  link.textContent="Lire la source ↗";
+  link.textContent="Lire la publication ↗";
 
-  pop.append(strong,document.createElement("br"),link);
-  m.bindPopup(pop);
-  newsLayer.addLayer(m);
+  popup.append(strong,document.createElement("br"),link);
+  marker.bindPopup(popup);
+  newsLayer.addLayer(marker);
  });
 }
 
-async function loadQuakes(){
- try{
-  let r=await fetchWithTimeout(USGS,15000);
-  if(!r.ok)throw new Error("USGS HTTP "+r.status);
-
-  let d=await r.json();
-  if(!Array.isArray(d.features))throw new Error("Format GeoJSON incorrect");
-
-  quakes=d.features;
-  $("quakeCount").textContent=quakes.length;
-  $("quakeStatus").textContent=quakes.length+" séismes reçus depuis le flux officiel USGS.";
-
-  const list=$("earthquakeList");
-  list.replaceChildren();
-
-  quakes.slice()
-   .sort((a,b)=>b.properties.time-a.properties.time)
-   .slice(0,14)
-   .forEach(q=>{
-    const row=document.createElement("div");
-    row.className="quake";
-
-    const mag=Number(q.properties.mag);
-    const link=document.createElement("a");
-    link.href=q.properties.url;
-    link.target="_blank";
-    link.rel="noopener noreferrer";
-    link.textContent="M"+(Number.isFinite(mag)?mag.toFixed(1):"?")+" — "+q.properties.place+" ↗";
-
-    row.append(
-     link,
-     document.createElement("br"),
-     document.createTextNode(new Date(q.properties.time).toLocaleString("fr-FR"))
-    );
-
-    list.append(row);
-   });
-
-  drawQuakes();
-
- }catch(e){
-  $("quakeStatus").textContent=
-   "Flux USGS indisponible : "+e.message+". Ouvre la carte officielle USGS.";
-
-  $("quakeCount").textContent="—";
-
-  $("earthquakeList").innerHTML=
-   '<a href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener">Consulter les séismes sur la carte USGS ↗</a>';
- }
-}
-
 function drawQuakes(){
- if(!quakeLayer)return;
+ if(!quakeLayer||!window.L)return;
  quakeLayer.clearLayers();
  if(!showQuakes)return;
 
@@ -472,138 +749,213 @@ function drawQuakes(){
   if(!c)return;
 
   const mag=Number(q.properties.mag)||0;
-
-  const m=L.circleMarker([c[1],c[0]],{
+  const marker=L.circleMarker([c[1],c[0]],{
    radius:Math.max(3,Math.min(12,mag*2)),
-   color:"#ffbd73",
-   fillColor:"#ff6b35",
-   fillOpacity:.85,
-   weight:1
+   color:"#ffbd73",fillColor:"#ff6b35",fillOpacity:.85,weight:1
   });
 
-  const pop=document.createElement("div");
-  const b=document.createElement("strong");
-  b.textContent=q.properties.title;
+  const popup=document.createElement("div");
+  const strong=document.createElement("strong");
+  strong.textContent=q.properties.title;
 
-  const a=document.createElement("a");
-  a.href=q.properties.url;
-  a.target="_blank";
-  a.rel="noopener noreferrer";
-  a.textContent="Détails USGS ↗";
+  const link=document.createElement("a");
+  link.href=q.properties.url;
+  link.target="_blank";
+  link.rel="noopener noreferrer";
+  link.textContent="Détails USGS ↗";
 
-  pop.append(b,document.createElement("br"),a);
-  m.bindPopup(pop);
-  quakeLayer.addLayer(m);
+  popup.append(strong,document.createElement("br"),link);
+  marker.bindPopup(popup);
+  quakeLayer.addLayer(marker);
  });
 }
 
-function renderSources(){
- const box=$("sourceGrid");
+async function loadQuakes(){
+ try{
+  const r=await fetchTimeout(USGS,15000);
+  if(!r.ok)throw new Error("HTTP "+r.status);
 
- SOURCES.forEach(s=>{
-  const d=document.createElement("div");
-  d.className="source";
+  const data=await r.json();
+  if(!Array.isArray(data.features))throw new Error("Format GeoJSON invalide");
 
-  const b=document.createElement("strong");
-  b.textContent=s[0];
+  quakes=data.features;
+  $("quakeCount").textContent=quakes.length;
+  status("quakeStatus",quakes.length+" séismes reçus depuis le flux officiel USGS.","good");
 
-  const p=document.createElement("span");
-  p.textContent=s[1];
+  const box=$("earthquakeList");
+  box.replaceChildren();
 
-  const a=document.createElement("a");
-  a.href=s[2];
-  a.target="_blank";
-  a.rel="noopener noreferrer";
-  a.textContent="Accéder au site ↗";
+  quakes.slice().sort((a,b)=>b.properties.time-a.properties.time).slice(0,14).forEach(q=>{
+   const d=document.createElement("div");
+   d.className="quake";
 
-  d.append(b,p,a);
-  box.append(d);
- });
+   const a=document.createElement("a");
+   a.href=q.properties.url;
+   a.target="_blank";
+   a.rel="noopener noreferrer";
+   a.textContent=q.properties.title;
+
+   d.append(a,document.createElement("br"));
+   d.append(document.createTextNode(new Date(q.properties.time).toLocaleString("fr-FR")));
+   box.append(d);
+  });
+
+  drawQuakes();
+
+ }catch(e){
+  $("quakeCount").textContent="—";
+  status("quakeStatus","Flux USGS indisponible : "+e.message+". Consulte le site officiel.","error");
+
+  $("earthquakeList").innerHTML='<a href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener">Ouvrir la carte officielle USGS ↗</a>';
+ }
 }
 
-function renderSearches(){
- const box=$("quickSearch");
+const ECON={
+ gdp:{label:"PIB par habitant",indicator:"NY.GDP.PCAP.CD",unit:"$ US"},
+ inflation:{label:"Inflation annuelle",indicator:"FP.CPI.TOTL.ZG",unit:"%"}
+};
 
- SEARCHES.forEach(s=>{
-  const d=document.createElement("div");
-  d.className="sidebox";
+const COUNTRIES=["USA","CHN","FRA","IND","DEU","JPN","GBR","BRA","RUS"];
 
-  const b=document.createElement("h4");
-  b.textContent=s[0];
-
-  const a=document.createElement("a");
-  a.href="https://www.google.com/search?tbm=nws&q="+encodeURIComponent(s[1]);
-  a.target="_blank";
-  a.rel="noopener noreferrer";
-  a.textContent="Articles récents ↗";
-
-  const g=document.createElement("a");
-  g.href=buildGdeltUrl("html",'('+s[1]+')');
-  g.target="_blank";
-  g.rel="noopener noreferrer";
-  g.textContent="Recherche GDELT ↗";
-
-  d.append(b,a,g);
-  box.append(d);
- });
+function formatNumber(v){
+ return Number(v).toLocaleString("fr-FR",{maximumFractionDigits:2});
 }
 
-$("filters").addEventListener("click",e=>{
- const b=e.target.closest("button[data-cat]");
- if(!b)return;
+async function loadEconomy(){
+ const mode=ECON[econMode];
+ if(!mode)return;
 
- activeCat=b.dataset.cat;
+ status("economicStatus","Récupération des données de la Banque mondiale…");
 
- document.querySelectorAll(".chip").forEach(x=>
-  x.classList.toggle("active",x===b)
- );
+ $("economicTable").innerHTML='<tr><td colspan="5">Chargement des indicateurs…</td></tr>';
 
- renderStories();
-});
+ try{
+  const url=WB+"/country/"+COUNTRIES.join(";")+"/indicator/"+mode.indicator+"?format=json&per_page=200";
+  const r=await fetchTimeout(url,20000);
+  if(!r.ok)throw new Error("HTTP "+r.status);
 
-$("refresh").addEventListener("click",()=>{
- loadNews();
- loadQuakes();
+  const data=await r.json();
+  if(!Array.isArray(data)||!Array.isArray(data[1]))throw new Error("Format de données inattendu");
+
+  const latest={};
+
+  data[1].forEach(item=>{
+   if(item.value!==null&&!latest[item.country.id]){
+    latest[item.country.id]=item;
+   }
+  });
+
+  const rows=Object.values(latest).sort((a,b)=>a.country.value.localeCompare(b.country.value));
+
+  const body=$("economicTable");
+  body.replaceChildren();
+
+  rows.forEach(item=>{
+   const tr=document.createElement("tr");
+
+   const values=[
+    item.country.value,
+    mode.label,
+    formatNumber(item.value)+" "+mode.unit,
+    item.date
+   ];
+
+   values.forEach(v=>{
+    const td=document.createElement("td");
+    td.textContent=v;
+    tr.append(td);
+   });
+
+   const source=document.createElement("td");
+   const link=document.createElement("a");
+   link.href="https://data.worldbank.org/indicator/"+mode.indicator;
+   link.target="_blank";
+   link.rel="noopener noreferrer";
+   link.textContent="Banque mondiale ↗";
+   source.append(link);
+   tr.append(source);
+
+   body.append(tr);
+  });
+
+  $("economicCount").textContent=rows.length;
+  status("economicStatus","Données reçues. Dernière année disponible selon les pays et l'indicateur.","good");
+
+ }catch(e){
+  $("economicCount").textContent="—";
+  $("economicTable").innerHTML='<tr><td colspan="5">Indicateur indisponible. Consulte directement <a href="https://data.worldbank.org/" target="_blank" rel="noopener">World Bank Data ↗</a>.</td></tr>';
+  status("economicStatus","Accès à la Banque mondiale indisponible : "+e.message,"error");
+ }
+}
+
+document.querySelectorAll("[data-econ]").forEach(button=>{
+ button.addEventListener("click",()=>{
+  const mode=button.dataset.econ;
+
+  if(mode==="energy"){
+   document.querySelectorAll("[data-econ]").forEach(b=>b.classList.toggle("active",b===button));
+
+   $("economicTable").innerHTML=
+    '<tr><td colspan="5">Les données énergétiques sont disponibles auprès de l’AIE, qui publie des analyses et indicateurs spécialisés.</td></tr>';
+
+   status("economicStatus","Pour les données énergétiques, ouvre les publications de l'Agence internationale de l'énergie.","warn");
+   $("economicCount").textContent="—";
+   return;
+  }
+
+  econMode=mode;
+  document.querySelectorAll("[data-econ]").forEach(b=>b.classList.toggle("active",b===button));
+  loadEconomy();
+ });
 });
 
 $("toggleQuakes").addEventListener("click",e=>{
  showQuakes=!showQuakes;
  e.currentTarget.textContent="Séismes : "+(showQuakes?"ON":"OFF");
-
  if(quakeLayer){
   showQuakes?mapObj.addLayer(quakeLayer):mapObj.removeLayer(quakeLayer);
  }
-
  drawQuakes();
 });
 
-$("toggleMapNews").addEventListener("click",e=>{
+$("toggleNews").addEventListener("click",e=>{
  showNews=!showNews;
- e.currentTarget.textContent="Articles géolocalisés : "+(showNews?"ON":"OFF");
-
+ e.currentTarget.textContent="Actualités : "+(showNews?"ON":"OFF");
  if(newsLayer){
   showNews?mapObj.addLayer(newsLayer):mapObj.removeLayer(newsLayer);
  }
-
  renderMarkers();
 });
 
-function clock(){
- const d=new Date();
- $("clock").textContent=d.toLocaleTimeString("fr-FR",{timeZone:"UTC"})+" UTC";
+$("refresh").addEventListener("click",()=>{
+ loadNews();
+ loadQuakes();
+ loadEconomy();
+});
+
+function updateClock(){
+ $("clock").textContent=new Date().toLocaleString("fr-FR",{
+  timeZone:"UTC",hour:"2-digit",minute:"2-digit",second:"2-digit"
+ })+" UTC";
 }
 
-renderSources();
-renderSearches();
-initMap();
-clock();
+renderCards("sourceGrid",SOURCES.map(s=>[s[0],s[1],[["Accéder au site",s[2]]]]));
+renderCards("osintGrid",OSINT.map(s=>[s[0],s[1],[["Ouvrir l'outil",s[2]]]]));
+renderCards("maritimeGrid",MARITIME.map(s=>[s.name,s.desc,s.links]));
 
-setInterval(clock,1000);
+renderFavorites();
+initMap();
+updateClock();
+
+setInterval(updateClock,1000);
+
 loadNews();
 loadQuakes();
+loadEconomy();
 
 setInterval(loadNews,10*60*1000);
 setInterval(loadQuakes,5*60*1000);
+setInterval(loadEconomy,24*60*60*1000);
 
 </script>
 </body>
